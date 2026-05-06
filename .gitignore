@@ -1,0 +1,25 @@
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Project specific
+prompt.md
+*.png
+*.jpg
+*.jpeg
+
+# Dependencies
+node_modules/
+dist/
+.next/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+postgres_data/

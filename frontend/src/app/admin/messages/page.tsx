@@ -15,6 +15,8 @@ export default function AdminMessagesPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const { data: messages, isLoading } = useQuery({
     queryKey: ['admin-messages'],
@@ -36,11 +38,19 @@ export default function AdminMessagesPage() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-messages'] }); },
   });
 
-  const filtered = messages?.filter((m: Message) =>
+  const filtered = (messages?.filter((m: Message) =>
     m.name.toLowerCase().includes(search.toLowerCase()) ||
     m.subject.toLowerCase().includes(search.toLowerCase()) ||
     m.email.toLowerCase().includes(search.toLowerCase())
-  ).sort((a: Message, b: Message) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  ) || []).sort((a: Message, b: Message) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setCurrentPage(1);
+  };
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
@@ -60,7 +70,7 @@ export default function AdminMessagesPage() {
         </div>
         <div className="relative w-full sm:w-72">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input placeholder="Search messages..." value={search} onChange={e => setSearch(e.target.value)}
+          <input placeholder="Search messages..." value={search} onChange={e => handleSearch(e.target.value)}
             className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
           />
         </div>
@@ -80,7 +90,7 @@ export default function AdminMessagesPage() {
                     <p className="font-medium">All caught up!</p>
                   </div>
                 ) : (
-                  filtered?.map((msg: Message) => (
+                  paginatedData.map((msg: Message) => (
                     <button
                       key={msg.id}
                       onClick={() => handleSelectMessage(msg)}
@@ -104,6 +114,31 @@ export default function AdminMessagesPage() {
                   ))
                 )}
               </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="px-4 py-3 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
+                  <div className="flex gap-2 w-full">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(prev => prev - 1)}
+                      className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    >
+                      Prev
+                    </button>
+                    <div className="flex items-center px-2 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                      {currentPage}/{totalPages}
+                    </div>
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(prev => prev + 1)}
+                      className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Detail View */}

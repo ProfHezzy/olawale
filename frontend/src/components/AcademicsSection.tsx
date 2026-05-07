@@ -1,32 +1,13 @@
-'use client';
-
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
-import { GraduationCap, Calendar, MapPin, Award } from 'lucide-react';
-
-const academics = [
-  {
-    degree: "Bachelor of Science in Computer Science",
-    institution: "University of Lagos",
-    location: "Lagos, Nigeria",
-    period: "2016 – 2020",
-    grade: "Second Class Upper",
-    description: "Majored in Software Engineering with a focus on algorithms, data structures, and distributed systems. Led the university's developer club and organized three hackathons.",
-    icon: "🎓",
-    color: "from-blue-500 to-primary"
-  },
-  {
-    degree: "West African Senior School Certificate",
-    institution: "Government College",
-    location: "Ibadan, Nigeria",
-    period: "2010 – 2016",
-    grade: "Distinctions in Sciences",
-    description: "Completed secondary education with outstanding results in Mathematics, Physics, and Chemistry. Developed a passion for computing and logical problem-solving.",
-    icon: "📚",
-    color: "from-emerald-500 to-teal-600"
-  },
-];
+import { Loader2, GraduationCap, Calendar, MapPin, Award } from 'lucide-react';
 
 export default function AcademicsSection() {
+  const { data: academics, isLoading } = useQuery({
+    queryKey: ['academics'],
+    queryFn: () => api.get('/academics').then(r => r.data),
+  });
   return (
     <section id="academics" className="py-24 bg-slate-50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
@@ -39,15 +20,15 @@ export default function AcademicsSection() {
           </p>
         </div>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Vertical Line */}
-          <div className="absolute left-1/2 -translate-x-px top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-emerald-500 to-transparent hidden lg:block" />
-
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="animate-spin text-primary" size={40} />
+          </div>
+        ) : (
           <div className="space-y-12">
-            {academics.map((item, idx) => (
+            {academics?.map((item: any, idx: number) => (
               <motion.div
-                key={idx}
+                key={item.id}
                 initial={{ opacity: 0, x: idx % 2 === 0 ? -40 : 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -67,32 +48,38 @@ export default function AcademicsSection() {
                     
                     <div className={`flex items-center gap-3 mb-4 ${idx % 2 !== 0 ? 'lg:justify-end' : ''}`}>
                       <span className="font-bold text-primary text-sm">{item.institution}</span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-slate-500 text-sm flex items-center gap-1">
-                        <MapPin size={12} /> {item.location}
-                      </span>
+                      {item.location && (
+                        <>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-500 text-sm flex items-center gap-1">
+                            <MapPin size={12} /> {item.location}
+                          </span>
+                        </>
+                      )}
                     </div>
 
-                    <p className="text-slate-500 text-sm leading-relaxed mb-5">{item.description}</p>
+                    {item.description && <p className="text-slate-500 text-sm leading-relaxed mb-5">{item.description}</p>}
 
-                    <div className={`flex ${idx % 2 !== 0 ? 'lg:justify-end' : ''}`}>
-                      <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-100">
-                        <Award size={12} /> {item.grade}
-                      </span>
-                    </div>
+                    {item.grade && (
+                      <div className={`flex ${idx % 2 !== 0 ? 'lg:justify-end' : ''}`}>
+                        <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-100">
+                          <Award size={12} /> {item.grade}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Timeline Node */}
                 <div className={`hidden lg:flex items-center justify-center ${idx % 2 !== 0 ? 'lg:order-1 justify-end' : 'justify-start'}`}>
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-2xl shadow-lg`}>
-                    {item.icon}
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${idx % 2 === 0 ? 'from-blue-500 to-primary' : 'from-emerald-500 to-teal-600'} flex items-center justify-center text-2xl shadow-lg text-white`}>
+                    <GraduationCap size={32} />
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

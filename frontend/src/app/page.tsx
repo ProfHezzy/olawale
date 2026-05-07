@@ -7,6 +7,7 @@ import Hero from "@/components/Hero";
 import SkillsBento from "@/components/SkillsBento";
 import AcademicsSection from "@/components/AcademicsSection";
 import CertificationsSection from "@/components/CertificationsSection";
+import ExperienceSection from "@/components/ExperienceSection";
 import Footer from "@/components/Footer";
 import { ArrowRight, ExternalLink, Loader2, Clock, BookOpen } from "lucide-react";
 import Link from 'next/link';
@@ -136,6 +137,9 @@ export default function Home() {
 
       {/* ── Skills Bento ── */}
       <SkillsBento />
+
+      {/* ── Work Experience ── */}
+      <ExperienceSection />
 
       {/* ── Featured Projects ── */}
       <section id="projects" className="py-24 bg-slate-900 text-white overflow-hidden">

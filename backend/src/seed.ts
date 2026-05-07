@@ -5,6 +5,9 @@ import { SkillsService } from './skills/skills.service';
 import { AuthService } from './auth/auth.service';
 import { BlogService } from './blog/blog.service';
 import { ProfileService } from './profile/profile.service';
+import { ExperienceService } from './experience/experience.service';
+import { AcademicService } from './academics/academic.service';
+import { CertificationService } from './certifications/certification.service';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -14,6 +17,9 @@ async function bootstrap() {
   const authService = app.get(AuthService);
   const blogService = app.get(BlogService);
   const profileService = app.get(ProfileService);
+  const experienceService = app.get(ExperienceService);
+  const academicService = app.get(AcademicService);
+  const certificationService = app.get(CertificationService);
 
   console.log('🌱 Seeding database...');
 
@@ -188,6 +194,47 @@ async function bootstrap() {
     }
   }
   console.log('✅ Blog posts seeded');
+
+  // 5. Seed Experience
+  const experiences = [
+    { company: 'Tech Innovators Inc.', position: 'Senior Full-Stack Developer', period: 'Jan 2022 - Present', description: 'Lead development of enterprise cloud solutions using Next.js and NestJS. Managed a team of 5 developers.', order: 1 },
+    { company: 'Digital Solutions Ltd.', position: 'Full-Stack Developer', period: 'Mar 2020 - Dec 2021', description: 'Developed and maintained various client websites and internal tools. Focused on React and Node.js.', order: 2 },
+    { company: 'Startup Hub', position: 'Junior Web Developer', period: 'Jun 2018 - Feb 2020', description: 'Built responsive web interfaces and assisted in backend development with Django.', order: 3 },
+  ];
+
+  for (const exp of experiences) {
+    try {
+      await experienceService.create(exp);
+    } catch (e) {}
+  }
+  console.log('✅ Experience seeded');
+
+  // 6. Seed Academics
+  const academics = [
+    { institution: 'Federal University of Technology', degree: 'B.Tech in Computer Science', period: '2014 - 2019', grade: 'First Class Honors', order: 1 },
+    { institution: 'Lagos State Polytechnic', degree: 'National Diploma in Computer Engineering', period: '2012 - 2014', grade: 'Distinction', order: 2 },
+  ];
+
+  for (const acad of academics) {
+    try {
+      await academicService.create(acad);
+    } catch (e) {}
+  }
+  console.log('✅ Academics seeded');
+
+  // 7. Seed Certifications
+  const certifications = [
+    { title: 'AWS Certified Solutions Architect', issuer: 'Amazon Web Services', date: 'Mar 2023', link: '#', order: 1 },
+    { title: 'Professional Scrum Master I', issuer: 'Scrum.org', date: 'Nov 2022', link: '#', order: 2 },
+    { title: 'Google Professional Cloud Developer', issuer: 'Google Cloud', date: 'Jan 2022', link: '#', order: 3 },
+  ];
+
+  for (const cert of certifications) {
+    try {
+      await certificationService.create(cert);
+    } catch (e) {}
+  }
+  console.log('✅ Certifications seeded');
 
   console.log('\n🚀 Seeding complete!');
   console.log('🔑 Admin credentials: admin / admin123');

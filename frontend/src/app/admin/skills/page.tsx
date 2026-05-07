@@ -95,6 +95,8 @@ export default function AdminSkillsPage() {
   const queryClient = useQueryClient();
   const [modal, setModal] = useState<'create' | Skill | null>(null);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const { data: skills, isLoading } = useQuery({
     queryKey: ['admin-skills'],
@@ -107,10 +109,18 @@ export default function AdminSkillsPage() {
     onError: () => toast.error('Failed to delete'),
   });
 
-  const filtered = skills?.filter((s: Skill) =>
+  const filtered = (skills?.filter((s: Skill) =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
     s.category.toLowerCase().includes(search.toLowerCase())
-  ).sort((a: Skill, b: Skill) => a.order - b.order);
+  ) || []).sort((a: Skill, b: Skill) => a.order - b.order);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -126,7 +136,7 @@ export default function AdminSkillsPage() {
 
       <div className="relative">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input placeholder="Search skills..." value={search} onChange={e => setSearch(e.target.value)}
+        <input placeholder="Search skills..." value={search} onChange={e => handleSearch(e.target.value)}
           className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
         />
       </div>
@@ -146,7 +156,7 @@ export default function AdminSkillsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filtered?.map((skill: Skill) => (
+                {paginatedData.map((skill: Skill) => (
                   <tr key={skill.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-6 py-4">
                       <p className="font-bold text-slate-900 text-sm">{skill.name}</p>
@@ -174,6 +184,31 @@ export default function AdminSkillsPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  Page {currentPage} of {totalPages}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
             {filtered?.length === 0 && (
               <div className="py-16 text-center text-slate-400">
                 <p className="font-medium">No skills found.</p>

@@ -120,6 +120,8 @@ export default function AdminProjectsPage() {
   const queryClient = useQueryClient();
   const [modal, setModal] = useState<'create' | Project | null>(null);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['admin-projects'],
@@ -135,7 +137,16 @@ export default function AdminProjectsPage() {
   const filtered = projects?.filter((p: Project) =>
     p.title.toLowerCase().includes(search.toLowerCase()) ||
     p.category.toLowerCase().includes(search.toLowerCase())
-  );
+  ) || [];
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  // Reset to page 1 when search changes
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -156,7 +167,7 @@ export default function AdminProjectsPage() {
         <input
           placeholder="Search projects..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => handleSearch(e.target.value)}
           className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
         />
       </div>
@@ -178,7 +189,7 @@ export default function AdminProjectsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filtered?.map((project: Project) => (
+                {paginatedData.map((project: Project) => (
                   <tr key={project.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -196,7 +207,7 @@ export default function AdminProjectsPage() {
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
                       <div className="flex flex-wrap gap-1">
-                        {(Array.isArray(project.tech_stack) ? project.tech_stack : project.tech_stack?.split(',') || []).slice(0, 3).map((t: string) => (
+                        {(Array.isArray(project.tech_stack) ? project.tech_stack : (project.tech_stack as string)?.split(',') || []).slice(0, 3).map((t: string) => (
                           <span key={t} className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-medium">{t.trim()}</span>
                         ))}
                       </div>
@@ -239,6 +250,31 @@ export default function AdminProjectsPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  Page {currentPage} of {totalPages}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
             {filtered?.length === 0 && (
               <div className="py-16 text-center text-slate-400">
                 <p className="font-medium">No projects found.</p>

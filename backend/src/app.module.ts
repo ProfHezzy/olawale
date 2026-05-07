@@ -11,6 +11,9 @@ import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { UploadModule } from './upload/upload.module';
 import { MailModule } from './mail/mail.module';
+import { ExperienceModule } from './experience/experience.module';
+import { AcademicsModule } from './academics/academic.module';
+import { CertificationModule } from './certifications/certification.module';
 
 @Module({
   imports: [
@@ -43,6 +46,9 @@ import { MailModule } from './mail/mail.module';
     ProfileModule,
     UploadModule,
     MailModule,
+    ExperienceModule,
+    AcademicsModule,
+    CertificationModule,
   ],
 })
 export class AppModule {}

@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Briefcase, BookOpen, Award, MessageSquare, Settings, LogOut, User, Menu, X, Globe
+  LayoutDashboard, Briefcase, BookOpen, Award, MessageSquare, Settings, LogOut, User, Menu, X, Globe, GraduationCap, Wrench
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -12,8 +12,11 @@ import toast from 'react-hot-toast';
 const sidebarLinks = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Projects', href: '/admin/projects', icon: Briefcase },
+  { name: 'Experience', href: '/admin/experience', icon: Briefcase },
   { name: 'Blog', href: '/admin/blog', icon: BookOpen },
-  { name: 'Skills', href: '/admin/skills', icon: Award },
+  { name: 'Skills', href: '/admin/skills', icon: Wrench },
+  { name: 'Academics', href: '/admin/academics', icon: GraduationCap },
+  { name: 'Certifications', href: '/admin/certifications', icon: Award },
   { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];

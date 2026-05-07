@@ -116,6 +116,8 @@ export default function AdminBlogPage() {
   const queryClient = useQueryClient();
   const [modal, setModal] = useState<'create' | BlogPost | null>(null);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ['admin-posts'],
@@ -131,7 +133,15 @@ export default function AdminBlogPage() {
   const filtered = posts?.filter((p: BlogPost) =>
     p.title.toLowerCase().includes(search.toLowerCase()) ||
     p.category?.toLowerCase().includes(search.toLowerCase())
-  );
+  ) || [];
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -147,7 +157,7 @@ export default function AdminBlogPage() {
 
       <div className="relative">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input placeholder="Search posts..." value={search} onChange={e => setSearch(e.target.value)}
+        <input placeholder="Search posts..." value={search} onChange={e => handleSearch(e.target.value)}
           className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
         />
       </div>
@@ -168,7 +178,7 @@ export default function AdminBlogPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filtered?.map((post: BlogPost) => (
+                {paginatedData.map((post: BlogPost) => (
                   <tr key={post.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-6 py-4">
                       <div>
@@ -210,6 +220,31 @@ export default function AdminBlogPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  Page {currentPage} of {totalPages}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => prev - 1)}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
             {filtered?.length === 0 && (
               <div className="py-16 text-center text-slate-400">
                 <p className="font-medium">No posts found.</p>

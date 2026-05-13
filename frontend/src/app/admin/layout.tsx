@@ -25,13 +25,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Auth guard — redirect to login if no token
   useEffect(() => {
-    if (pathname === '/admin/login') return;
+    setIsMounted(true);
+    if (pathname === '/admin/login') {
+      setIsChecking(false);
+      return;
+    }
     const token = localStorage.getItem('auth_token');
-    if (!token) router.push('/admin/login');
+    if (!token) {
+      router.push('/admin/login');
+    } else {
+      setIsChecking(false);
+    }
   }, [pathname, router]);
+
+  if (!isMounted || (isChecking && pathname !== '/admin/login')) {
+    return (
+      <div className="h-screen w-full bg-slate-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (pathname === '/admin/login') return <>{children}</>;
 

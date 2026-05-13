@@ -15,4 +15,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Add response interceptor to handle 401s
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/admin/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

@@ -35,9 +35,9 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
       {/* Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[80px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-[80px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
                 <input
                   {...register('username')}
                   placeholder="admin"
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-800 border border-white/10 rounded-xl text-white placeholder:text-slate-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-800 border border-white/10 rounded-xl text-white placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none font-medium"
                 />
               </div>
               {errors.username && <p className="text-xs text-red-400 font-medium">{errors.username.message as string}</p>}
@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-12 py-3.5 bg-slate-800 border border-white/10 rounded-xl text-white placeholder:text-slate-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium"
+                  className="w-full pl-11 pr-12 py-3.5 bg-slate-800 border border-white/10 rounded-xl text-white placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none font-medium"
                 />
                 <button
                   type="button"

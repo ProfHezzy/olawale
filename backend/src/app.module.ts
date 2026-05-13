@@ -27,16 +27,33 @@ import { CertificationModule } from './certifications/certification.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST'),
-        port: configService.get<number>('DATABASE_PORT'),
-        username: configService.get<string>('DATABASE_USER'),
-        password: configService.get<string>('DATABASE_PASSWORD'),
-        database: configService.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        synchronize: true, // Only for development!
-      }),
+      useFactory: (configService: ConfigService) => {
+        const url = configService.get<string>('DATABASE_URL');
+        const nodeEnv = configService.get<string>('NODE_ENV');
+        
+        if (url) {
+          console.log('Database connection: Using DATABASE_URL');
+          return {
+            type: 'postgres',
+            url,
+            autoLoadEntities: true,
+            synchronize: nodeEnv !== 'production',
+            ssl: nodeEnv === 'production' ? { rejectUnauthorized: false } : false,
+          };
+        }
+
+        console.log('Database connection: Using individual fields');
+        return {
+          type: 'postgres',
+          host: configService.get<string>('DATABASE_HOST'),
+          port: configService.get<number>('DATABASE_PORT'),
+          username: configService.get<string>('DATABASE_USER'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          database: configService.get<string>('DATABASE_NAME'),
+          autoLoadEntities: true,
+          synchronize: nodeEnv !== 'production',
+        };
+      },
     }),
     ProjectsModule,
     BlogModule,

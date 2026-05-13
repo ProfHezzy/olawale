@@ -37,7 +37,7 @@ import { CertificationModule } from './certifications/certification.module';
             type: 'postgres',
             url,
             autoLoadEntities: true,
-            synchronize: nodeEnv !== 'production',
+            synchronize: true, // Enable for initial deployment to create tables
             ssl: nodeEnv === 'production' ? { rejectUnauthorized: false } : false,
           };
         }
@@ -51,7 +51,7 @@ import { CertificationModule } from './certifications/certification.module';
           password: configService.get<string>('DATABASE_PASSWORD'),
           database: configService.get<string>('DATABASE_NAME'),
           autoLoadEntities: true,
-          synchronize: nodeEnv !== 'production',
+          synchronize: true, // Enable for initial deployment
         };
       },
     }),

@@ -44,4 +44,14 @@ export class ProjectsController {
   remove(@Param('id') id: string) {
     return this.projectsService.remove(id);
   }
+
+  @Patch(':id/like')
+  like(@Param('id') id: string) {
+    return this.projectsService.like(id);
+  }
+
+  @Patch(':id/share')
+  share(@Param('id') id: string) {
+    return this.projectsService.share(id);
+  }
 }

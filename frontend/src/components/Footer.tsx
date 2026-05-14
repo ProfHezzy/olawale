@@ -176,11 +176,6 @@ export default function Footer() {
           <p className="text-slate-500 text-sm">
             © {year} {profile?.full_name || 'Hezekiah Olawale Ojenike'}. Crafted with ❤️ using Next.js & NestJS.
           </p>
-          <div className="flex items-center gap-6">
-            <Link href="/contact" className="text-slate-500 hover:text-white transition-colors text-sm">Privacy</Link>
-            <Link href="/contact" className="text-slate-500 hover:text-white transition-colors text-sm">Terms</Link>
-            <Link href="/contact" className="text-slate-500 hover:text-white transition-colors text-sm">Sitemap</Link>
-          </div>
         </div>
       </div>
     </footer>

@@ -36,9 +36,9 @@ async function bootstrap() {
     await profileService.updateProfile({
       full_name: 'Hezekiah Olawale Ojenike',
       bio: 'A dedicated Full-Stack Developer and Tech Instructor.',
-      about_me: 'A dedicated Full-Stack Developer and Tech Instructor based in Lagos, Nigeria. I specialize in crafting high-performance web applications that merge elegant frontend experiences with powerful backend architectures.\n\nWhen I\'m not shipping production-ready code, I\'m mentoring developers, exploring distributed systems, or writing about software craftsmanship. Let\'s build something exceptional together.',
+      about_me: 'A dedicated Full-Stack Developer and Tech Instructor based in Ibarapa North, Oyo State. I specialize in crafting high-performance web applications that merge elegant frontend experiences with powerful backend architectures.\n\nWhen I\'m not shipping production-ready code, I\'m mentoring developers, exploring distributed systems, or writing about software craftsmanship. Let\'s build something exceptional together.',
       email: 'hello@hezekiah.dev',
-      location: 'Lagos, Nigeria',
+      location: 'Ibarapa North, Oyo State',
       phone: '+234 123 456 7890',
       github_url: 'https://github.com/ProfHezzy',
       linkedin_url: 'https://linkedin.com/in/hezekiahojenike',

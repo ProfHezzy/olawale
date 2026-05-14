@@ -14,6 +14,7 @@ import { MailModule } from './mail/mail.module';
 import { ExperienceModule } from './experience/experience.module';
 import { AcademicsModule } from './academics/academic.module';
 import { CertificationModule } from './certifications/certification.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { CertificationModule } from './certifications/certification.module';
     ExperienceModule,
     AcademicsModule,
     CertificationModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}

@@ -1,15 +1,18 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { use } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Clock, Tag, Loader2, Share2 } from 'lucide-react';
+import CommentSection from '@/components/CommentSection';
+import toast from 'react-hot-toast';
+import { Heart, Share2, ArrowLeft, Calendar, Clock, Tag, Loader2 } from 'lucide-react';
 
 export default function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+  const queryClient = useQueryClient();
 
   const { data: post, isLoading } = useQuery({
     queryKey: ['blog', slug],
@@ -18,6 +21,35 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       return res.data;
     },
   });
+
+  const likeMutation = useMutation({
+    mutationFn: () => api.patch(`/blog/${post.id}/like`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blog', slug] });
+      toast.success('Thanks for the like!');
+    }
+  });
+
+  const shareMutation = useMutation({
+    mutationFn: () => api.patch(`/blog/${post.id}/share`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blog', slug] });
+    }
+  });
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title,
+        text: post.excerpt,
+        url: window.location.href,
+      }).then(() => shareMutation.mutate());
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+      shareMutation.mutate();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -71,7 +103,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
             <h1 className="text-3xl lg:text-5xl font-extrabold tracking-tight mb-6 leading-tight">{post.title}</h1>
 
             {/* Meta */}
-            <div className="flex flex-wrap items-center gap-4 text-slate-400 text-sm font-medium">
+            <div className="flex flex-wrap items-center gap-6 text-slate-400 text-sm font-medium">
               <span className="flex items-center gap-1.5">
                 <Calendar size={14} /> {new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
@@ -80,6 +112,20 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                   <Clock size={14} /> {post.read_time} min read
                 </span>
               )}
+              <div className="flex items-center gap-4 ml-auto">
+                <button 
+                  onClick={() => likeMutation.mutate()}
+                  className="flex items-center gap-1.5 hover:text-red-400 transition-colors"
+                >
+                  <Heart size={16} className={post.likes > 0 ? 'fill-red-400 text-red-400' : ''} /> {post.likes || 0}
+                </button>
+                <button 
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 hover:text-blue-400 transition-colors"
+                >
+                  <Share2 size={16} /> {post.shares || 0}
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -124,19 +170,32 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
               )}
+
+              {/* Comments Section */}
+              <CommentSection targetType="blog" targetId={post.id} />
             </div>
 
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Share */}
               <div className="bg-slate-50 p-5 rounded-[20px]">
-                <h3 className="font-bold text-slate-900 mb-3 text-sm uppercase tracking-wider">Share</h3>
-                <button
-                  onClick={() => navigator.clipboard.writeText(window.location.href)}
-                  className="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
-                >
-                  <Share2 size={16} /> Copy Link
-                </button>
+                <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider">Engagement</h3>
+                <div className="space-y-4">
+                  <button
+                    onClick={() => likeMutation.mutate()}
+                    className="flex items-center gap-3 w-full p-3 bg-white border border-slate-100 rounded-xl text-slate-600 font-bold hover:border-red-200 hover:text-red-500 transition-all text-sm shadow-sm"
+                  >
+                    <Heart size={18} className={post.likes > 0 ? 'fill-current' : ''} />
+                    Like Article ({post.likes || 0})
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-3 w-full p-3 bg-white border border-slate-100 rounded-xl text-slate-600 font-bold hover:border-blue-200 hover:text-blue-500 transition-all text-sm shadow-sm"
+                  >
+                    <Share2 size={18} />
+                    Share ({post.shares || 0})
+                  </button>
+                </div>
               </div>
 
               {/* Back to Blog */}

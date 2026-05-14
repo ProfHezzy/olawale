@@ -38,4 +38,14 @@ export class BlogController {
   remove(@Param('id') id: string) {
     return this.blogService.remove(id);
   }
+
+  @Patch(':id/like')
+  like(@Param('id') id: string) {
+    return this.blogService.like(id);
+  }
+
+  @Patch(':id/share')
+  share(@Param('id') id: string) {
+    return this.blogService.share(id);
+  }
 }

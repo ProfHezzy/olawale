@@ -6,7 +6,10 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { use } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Calendar, Tag, Loader2 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import CommentSection from '@/components/CommentSection';
+import { ArrowLeft, ExternalLink, Calendar, Tag, Loader2, Heart, Share2 } from 'lucide-react';
 
 const GithubIcon = ({ size = 20 }: { size?: number }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -17,6 +20,7 @@ const GithubIcon = ({ size = 20 }: { size?: number }) => (
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+  const queryClient = useQueryClient();
 
   const { data: project, isLoading } = useQuery({
     queryKey: ['project', slug],
@@ -25,6 +29,35 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
       return res.data;
     },
   });
+
+  const likeMutation = useMutation({
+    mutationFn: () => api.patch(`/projects/${project.id}/like`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', slug] });
+      toast.success('Glad you liked it!');
+    }
+  });
+
+  const shareMutation = useMutation({
+    mutationFn: () => api.patch(`/projects/${project.id}/share`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', slug] });
+    }
+  });
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: project.title,
+        text: project.description,
+        url: window.location.href,
+      }).then(() => shareMutation.mutate());
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+      shareMutation.mutate();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -69,6 +102,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <span className="px-3 py-1 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-full">{project.category}</span>
               {project.featured && <span className="px-3 py-1 bg-secondary/20 text-secondary text-xs font-bold uppercase tracking-widest rounded-full border border-secondary/30">Featured</span>}
+              <div className="flex items-center gap-4 ml-auto">
+                <button onClick={() => likeMutation.mutate()} className="flex items-center gap-1.5 text-slate-300 hover:text-red-400 transition-colors text-sm font-bold">
+                  <Heart size={18} className={project.likes > 0 ? 'fill-red-400 text-red-400' : ''} /> {project.likes || 0}
+                </button>
+                <button onClick={handleShare} className="flex items-center gap-1.5 text-slate-300 hover:text-blue-400 transition-colors text-sm font-bold">
+                  <Share2 size={18} /> {project.shares || 0}
+                </button>
+              </div>
             </div>
             <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tighter mb-4">{project.title}</h1>
             <p className="text-xl text-slate-300 max-w-3xl leading-relaxed">{project.description}</p>
@@ -107,6 +148,9 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                 <Calendar size={16} />
                 <span>Created: {new Date(project.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </div>
+
+              {/* Comments Section */}
+              <CommentSection targetType="project" targetId={project.id} />
             </div>
 
             {/* Sidebar */}
@@ -139,6 +183,21 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                 )}
               </div>
 
+              {/* Engagement Card */}
+              <div className="bg-white border border-slate-100 p-6 rounded-[24px] space-y-4">
+                <h3 className="font-bold text-slate-900 mb-2">Engagement</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => likeMutation.mutate()} className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors group">
+                    <Heart size={20} className={project.likes > 0 ? 'fill-red-400 text-red-400' : 'text-slate-400 group-hover:text-red-400'} />
+                    <span className="text-xs font-bold mt-1">{project.likes || 0}</span>
+                  </button>
+                  <button onClick={handleShare} className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 hover:text-blue-500 transition-colors group">
+                    <Share2 size={20} className="text-slate-400 group-hover:text-blue-400" />
+                    <span className="text-xs font-bold mt-1">{project.shares || 0}</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Category Card */}
               <div className="bg-white border border-slate-100 p-6 rounded-[24px]">
                 <h3 className="font-bold text-slate-900 mb-2">Category</h3>
@@ -146,7 +205,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
               </div>
 
               {/* Back CTA */}
-              <Link href="/projects" className="flex items-center justify-center gap-2 w-full py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:border-primary hover:text-primary transition-all">
+              <Link href="/projects" className="flex items-center justify-center gap-2 w-full py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:border-primary hover:text-primary transition-all text-sm">
                 <ArrowLeft size={16} /> All Projects
               </Link>
             </div>

@@ -6,6 +6,28 @@ import Providers from "@/components/Providers";
 export const metadata: Metadata = {
   title: "Hezekiah Olawale Ojenike | Full-Stack Developer",
   description: "Building Scalable Web Systems That Drive Real Results. Portfolio of Hezekiah Olawale Ojenike.",
+  openGraph: {
+    title: "Hezekiah Olawale Ojenike | Full-Stack Developer",
+    description: "Building Scalable Web Systems That Drive Real Results.",
+    url: "https://hezekiah.dev",
+    siteName: "HOO Portfolio",
+    images: [
+      {
+        url: "/og-image.png", // User can replace this with a real image in public folder
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hezekiah Olawale Ojenike | Full-Stack Developer",
+    description: "Building Scalable Web Systems That Drive Real Results.",
+    creator: "@ProfHezzy",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

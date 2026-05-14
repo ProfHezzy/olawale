@@ -233,63 +233,59 @@ export default function Home() {
       <CertificationsSection />
 
       {/* ── Blog Preview ── */}
-      <section id="blog" className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <div>
-              <span className="text-primary font-bold text-sm tracking-widest uppercase mb-4 block">Latest Thoughts</span>
-              <h2 className="text-4xl lg:text-5xl font-bold tracking-tight text-slate-900">From the Blog</h2>
+      {latestPosts && latestPosts.length > 0 && (
+        <section id="blog" className="py-24 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+              <div>
+                <span className="text-primary font-bold text-sm tracking-widest uppercase mb-4 block">Latest Thoughts</span>
+                <h2 className="text-4xl lg:text-5xl font-bold tracking-tight text-slate-900">From the Blog</h2>
+              </div>
+              <Link href="/blog" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-2 font-semibold shrink-0">
+                All Articles <ArrowRight size={20} />
+              </Link>
             </div>
-            <Link href="/blog" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-2 font-semibold shrink-0">
-              All Articles <ArrowRight size={20} />
-            </Link>
-          </div>
 
-          {loadingPosts ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="animate-spin text-primary" size={40} />
-            </div>
-          ) : latestPosts?.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {latestPosts.map((post: any, idx: number) => (
-                <motion.article
-                  key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="group bg-white rounded-[28px] border border-slate-100 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-300"
-                >
-                  <div className="aspect-[16/9] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
-                    {post.cover_image ? (
-                      <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">✍️</div>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 text-slate-400 text-xs mb-3">
-                      <Clock size={12} />
-                      <span>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            {loadingPosts ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="animate-spin text-primary" size={40} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {latestPosts.map((post: any, idx: number) => (
+                  <motion.article
+                    key={post.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="group bg-white rounded-[28px] border border-slate-100 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-300"
+                  >
+                    <div className="aspect-[16/9] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+                      {post.cover_image ? (
+                        <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl">✍️</div>
+                      )}
                     </div>
-                    <h3 className="font-bold text-xl text-slate-900 group-hover:text-primary transition-colors mb-3 line-clamp-2 leading-snug">{post.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed mb-5 line-clamp-2">{post.excerpt}</p>
-                    <Link href={`/blog/${post.slug}`} className="flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all">
-                      Read Article <ArrowRight size={16} />
-                    </Link>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          ) : (
-            <div className="py-20 text-center border border-dashed border-slate-200 rounded-3xl">
-              <BookOpen size={48} className="text-slate-200 mx-auto mb-4" />
-              <p className="text-slate-400 font-medium">No blog posts published yet.</p>
-              <p className="text-slate-300 text-sm mt-1">Check back soon for insightful articles.</p>
-            </div>
-          )}
-        </div>
-      </section>
+                    <div className="p-6">
+                      <div className="flex items-center gap-3 text-slate-400 text-xs mb-3">
+                        <Clock size={12} />
+                        <span>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      </div>
+                      <h3 className="font-bold text-xl text-slate-900 group-hover:text-primary transition-colors mb-3 line-clamp-2 leading-snug">{post.title}</h3>
+                      <p className="text-sm text-slate-500 leading-relaxed mb-5 line-clamp-2">{post.excerpt}</p>
+                      <Link href={`/blog/${post.slug}`} className="flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all">
+                        Read Article <ArrowRight size={16} />
+                      </Link>
+                    </div>
+                  </motion.article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── Contact CTA ── */}
       <section id="contact" className="py-24 bg-gradient-to-br from-primary via-blue-600 to-secondary text-white relative overflow-hidden">

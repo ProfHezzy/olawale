@@ -36,4 +36,14 @@ export class BlogService {
   async remove(id: string) {
     return this.blogRepository.delete(id);
   }
+
+  async like(id: string) {
+    await this.blogRepository.increment({ id }, 'likes', 1);
+    return this.blogRepository.findOne({ where: { id } });
+  }
+
+  async share(id: string) {
+    await this.blogRepository.increment({ id }, 'shares', 1);
+    return this.blogRepository.findOne({ where: { id } });
+  }
 }

@@ -38,6 +38,12 @@ export class BlogPost {
   @Column({ default: false })
   published: boolean;
 
+  @Column({ default: 0 })
+  likes: number;
+
+  @Column({ default: 0 })
+  shares: number;
+
   @CreateDateColumn()
   created_at: Date;
 

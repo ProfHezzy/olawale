@@ -40,4 +40,14 @@ export class ProjectsService {
   async remove(id: string) {
     return this.projectsRepository.delete(id);
   }
+
+  async like(id: string) {
+    await this.projectsRepository.increment({ id }, 'likes', 1);
+    return this.projectsRepository.findOne({ where: { id } });
+  }
+
+  async share(id: string) {
+    await this.projectsRepository.increment({ id }, 'shares', 1);
+    return this.projectsRepository.findOne({ where: { id } });
+  }
 }

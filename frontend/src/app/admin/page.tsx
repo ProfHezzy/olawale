@@ -7,18 +7,27 @@ import { Briefcase, BookOpen, Award, MessageSquare, TrendingUp, ArrowRight, Plus
 import { motion } from 'framer-motion';
 
 export default function AdminDashboard() {
-  const { data: projects } = useQuery({ queryKey: ['admin-projects'], queryFn: () => api.get('/projects').then(r => r.data) });
-  const { data: posts } = useQuery({ queryKey: ['admin-posts'], queryFn: () => api.get('/blog').then(r => r.data) });
-  const { data: skills } = useQuery({ queryKey: ['admin-skills'], queryFn: () => api.get('/skills').then(r => r.data) });
-  const { data: messages } = useQuery({ queryKey: ['admin-messages'], queryFn: () => api.get('/messages').then(r => r.data) });
-
-  const unread = messages?.filter((m: any) => !m.read)?.length || 0;
+  const { data: statsData } = useQuery({ 
+    queryKey: ['admin-stats'], 
+    queryFn: () => api.get('/admin/stats').then(r => r.data),
+    refetchInterval: 5000 
+  });
+  const { data: projects } = useQuery({ 
+    queryKey: ['admin-projects'], 
+    queryFn: () => api.get('/projects').then(r => r.data),
+    refetchInterval: 10000 
+  });
+  const { data: messages } = useQuery({ 
+    queryKey: ['admin-messages'], 
+    queryFn: () => api.get('/messages').then(r => r.data),
+    refetchInterval: 5000 
+  });
 
   const stats = [
-    { name: 'Total Projects', value: projects?.length ?? '—', icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50', href: '/admin/projects', trend: `${projects?.filter((p: any) => p.featured)?.length || 0} featured` },
-    { name: 'Blog Posts', value: posts?.length ?? '—', icon: BookOpen, color: 'text-purple-600', bg: 'bg-purple-50', href: '/admin/blog', trend: `${posts?.filter((p: any) => p.published)?.length || 0} published` },
-    { name: 'Skills', value: skills?.length ?? '—', icon: Award, color: 'text-emerald-600', bg: 'bg-emerald-50', href: '/admin/skills', trend: 'Across categories' },
-    { name: 'Unread Messages', value: unread, icon: MessageSquare, color: 'text-orange-600', bg: 'bg-orange-50', href: '/admin/messages', trend: `${messages?.length || 0} total` },
+    { name: 'Total Projects', value: statsData?.projects?.total ?? '—', icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50', href: '/admin/projects', trend: `${statsData?.projects?.likes || 0} likes` },
+    { name: 'Blog Engagement', value: statsData?.blogs?.total ?? '—', icon: BookOpen, color: 'text-purple-600', bg: 'bg-purple-50', href: '/admin/blog', trend: `${statsData?.blogs?.likes || 0} total likes` },
+    { name: 'Total Comments', value: statsData?.engagement?.totalComments ?? '—', icon: MessageSquare, color: 'text-emerald-600', bg: 'bg-emerald-50', href: '/admin/blog', trend: `${statsData?.engagement?.pendingComments || 0} pending` },
+    { name: 'Total Shares', value: statsData?.engagement?.totalShares ?? '—', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50', href: '/admin/projects', trend: 'Across all platforms' },
   ];
 
   const quickActions = [

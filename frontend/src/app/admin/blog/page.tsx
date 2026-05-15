@@ -122,6 +122,7 @@ export default function AdminBlogPage() {
   const { data: posts, isLoading } = useQuery({
     queryKey: ['admin-posts'],
     queryFn: () => api.get('/blog').then(r => r.data),
+    refetchInterval: 10000,
   });
 
   const deleteMutation = useMutation({

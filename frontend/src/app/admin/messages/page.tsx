@@ -21,6 +21,7 @@ export default function AdminMessagesPage() {
   const { data: messages, isLoading } = useQuery({
     queryKey: ['admin-messages'],
     queryFn: () => api.get('/messages').then(r => r.data),
+    refetchInterval: 5000
   });
 
   const deleteMutation = useMutation({

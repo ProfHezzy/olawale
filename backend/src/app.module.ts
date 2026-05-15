@@ -8,6 +8,7 @@ import { BlogModule } from './blog/blog.module';
 import { SkillsModule } from './skills/skills.module';
 import { MessagesModule } from './messages/messages.module';
 import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
 import { ProfileModule } from './profile/profile.module';
 import { UploadModule } from './upload/upload.module';
 import { MailModule } from './mail/mail.module';

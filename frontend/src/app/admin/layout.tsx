@@ -17,7 +17,8 @@ const sidebarLinks = [
   { name: 'Skills', href: '/admin/skills', icon: Wrench },
   { name: 'Academics', href: '/admin/academics', icon: GraduationCap },
   { name: 'Certifications', href: '/admin/certifications', icon: Award },
-  { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
+  { name: 'Comments', href: '/admin/comments', icon: MessageSquare },
+  { name: 'Messages', href: '/admin/messages', icon: Mail },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
@@ -99,7 +100,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <Icon size={18} />
                 {link.name}
-                {link.name === 'Messages' && <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">!</span>}
+                {(link.name === 'Messages' || link.name === 'Comments') && (
+                  <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">!</span>
+                )}
               </Link>
             );
           })}

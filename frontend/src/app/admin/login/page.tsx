@@ -85,6 +85,11 @@ export default function AdminLoginPage() {
                 </button>
               </div>
               {errors.password && <p className="text-xs text-red-400 font-medium">{errors.password.message as string}</p>}
+              <div className="flex justify-end">
+                <a href="/admin/forgot-password" size={14} className="text-[10px] font-bold text-slate-500 hover:text-primary transition-colors uppercase tracking-widest">
+                  Forgot password?
+                </a>
+              </div>
             </div>
 
             <button
@@ -96,10 +101,6 @@ export default function AdminLoginPage() {
               Sign In
             </button>
           </form>
-
-          <p className="text-center text-xs text-slate-600 mt-6 font-medium">
-            Default: <span className="text-slate-400 font-mono">admin</span> / <span className="text-slate-400 font-mono">admin123</span>
-          </p>
         </div>
       </div>
     </div>

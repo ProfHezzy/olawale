@@ -126,6 +126,7 @@ export default function AdminProjectsPage() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['admin-projects'],
     queryFn: () => api.get('/projects').then(r => r.data),
+    refetchInterval: 10000,
   });
 
   const deleteMutation = useMutation({

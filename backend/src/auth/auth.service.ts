@@ -3,7 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { User } from './entities/user.entity';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +13,7 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -33,5 +36,37 @@ export class AuthService {
     const password_hash = await bcrypt.hash(pass, 10);
     const user = this.usersRepository.create({ username, password_hash });
     return this.usersRepository.save(user);
+  }
+
+  async forgotPassword(email: string) {
+    // For this portfolio, we treat 'admin' as the primary user
+    const user = await this.usersRepository.findOne({ where: { username: 'admin' } });
+    if (!user) throw new Error('User not found');
+
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetToken = token;
+    user.resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour
+
+    await this.usersRepository.save(user);
+    await this.mailService.sendPasswordResetEmail(email, token);
+
+    return { message: 'Reset email sent' };
+  }
+
+  async resetPassword(token: string, newPass: string) {
+    const user = await this.usersRepository.findOne({ 
+      where: { resetToken: token } 
+    });
+
+    if (!user || !user.resetTokenExpires || user.resetTokenExpires < new Date()) {
+      throw new Error('Invalid or expired token');
+    }
+
+    user.password_hash = await bcrypt.hash(newPass, 10);
+    (user as any).resetToken = null;
+    (user as any).resetTokenExpires = null;
+
+    await this.usersRepository.save(user);
+    return { message: 'Password updated successfully' };
   }
 }

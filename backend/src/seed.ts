@@ -237,7 +237,6 @@ async function bootstrap() {
   console.log('✅ Certifications seeded');
 
   console.log('\n🚀 Seeding complete!');
-  console.log('🔑 Admin credentials: admin / admin123');
   console.log('🌐 Frontend: http://localhost:3000');
   console.log('📡 Backend:  http://localhost:3001');
   

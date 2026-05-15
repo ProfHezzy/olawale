@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Briefcase, BookOpen, Award, MessageSquare, Settings, LogOut, User, Menu, X, Globe, GraduationCap, Wrench
+  LayoutDashboard, Briefcase, BookOpen, Award, MessageSquare, Settings, LogOut, User, Menu, X, Globe, GraduationCap, Wrench, Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';

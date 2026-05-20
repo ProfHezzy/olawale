@@ -21,7 +21,71 @@ async function bootstrap() {
   const academicService = app.get(AcademicService);
   const certificationService = app.get(CertificationService);
 
-  console.log('🌱 Seeding database...');
+  console.log('🌱 Seeding database with Hezekiah Olawale Ojenike\'s official CV...');
+
+  // 0. Database Cleanup (prevents duplicates when re-seeding)
+  console.log('🧹 Clearing existing records to prevent duplication...');
+
+  try {
+    const experiences = await experienceService.findAll();
+    for (const exp of experiences) {
+      await experienceService.remove(exp.id);
+    }
+    console.log('🗑️  Cleared old experiences');
+  } catch (e) {
+    console.log('⚠️ Failed to clear experiences', e);
+  }
+
+  try {
+    const academics = await academicService.findAll();
+    for (const acad of academics) {
+      await academicService.remove(acad.id);
+    }
+    console.log('🗑️  Cleared old academics');
+  } catch (e) {
+    console.log('⚠️ Failed to clear academics', e);
+  }
+
+  try {
+    const certifications = await certificationService.findAll();
+    for (const cert of certifications) {
+      await certificationService.remove(cert.id);
+    }
+    console.log('🗑️  Cleared old certifications');
+  } catch (e) {
+    console.log('⚠️ Failed to clear certifications', e);
+  }
+
+  try {
+    const skills = await skillsService.findAll();
+    for (const sk of skills) {
+      await skillsService.remove(sk.id);
+    }
+    console.log('🗑️  Cleared old skills');
+  } catch (e) {
+    console.log('⚠️ Failed to clear skills', e);
+  }
+
+  try {
+    const projects = await projectsService.findAll();
+    for (const proj of projects) {
+      await projectsService.remove(proj.id);
+    }
+    console.log('🗑️  Cleared old projects');
+  } catch (e) {
+    console.log('⚠️ Failed to clear projects', e);
+  }
+
+  try {
+    // Note: blogService.findAll() only returns published posts. Let's delete whatever we find.
+    const posts = await blogService.findAll();
+    for (const post of posts) {
+      await blogService.remove(post.id);
+    }
+    console.log('🗑️  Cleared old blog posts');
+  } catch (e) {
+    console.log('⚠️ Failed to clear blog posts', e);
+  }
 
   // 1. Seed Admin User
   try {
@@ -31,115 +95,153 @@ async function bootstrap() {
     console.log('⚠️  Admin user might already exist, skipping...');
   }
 
-  // 1.5 Seed Profile
+  // 2. Seed Profile
   try {
     await profileService.updateProfile({
-      full_name: 'Hezekiah Olawale Ojenike',
-      bio: 'A dedicated Full-Stack Developer and Tech Instructor.',
-      about_me: 'A dedicated Full-Stack Developer and Tech Instructor based in Ibarapa North, Oyo State. I specialize in crafting high-performance web applications that merge elegant frontend experiences with powerful backend architectures.\n\nWhen I\'m not shipping production-ready code, I\'m mentoring developers, exploring distributed systems, or writing about software craftsmanship. Let\'s build something exceptional together.',
-      email: 'hello@hezekiah.dev',
-      location: 'Ibarapa North, Oyo State',
-      phone: '+234 123 456 7890',
+      full_name: 'HEZEKIAH OLAWALE OJENIKE',
+      bio: 'Full-Stack Developer · Python Engineer · Data Analyst · Technical Instructor',
+      about_me: 'Results-driven Full-Stack Developer and Python Engineer with 3+ years of hands-on experience building scalable web applications, backend systems, and data-driven tools across EdTech, FinTech, and SaaS domains. Proficient in Python, Django, JavaScript, PHP, and MySQL, with additional expertise in data analysis using Pandas, NumPy, and Microsoft Excel (advanced dashboards).\n\nBrings a rare combination of deep technical skill and proven instructional ability — having designed and delivered structured programming curricula for 5+ years, mentoring and upskilling 100+ aspiring developers. Equally effective in solo development, collaborative teams, and client-facing roles. Actively seeking opportunities across software engineering, data analysis, and technical training.',
+      email: 'hezekiahonline94@gmail.com',
+      location: 'Ibarapa North, Oyo State, Nigeria',
+      phone: '+234-814-027-2765',
       github_url: 'https://github.com/ProfHezzy',
       linkedin_url: 'https://linkedin.com/in/hezekiahojenike',
       twitter_url: 'https://twitter.com/hezekiah_dev',
       resume_url: '#',
-      years_experience: '5+',
-      projects_completed: '40+',
+      years_experience: '3+',
+      projects_completed: '8+',
       students_taught: '100+',
-      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=500&auto=format&fit=crop',
-      about_image_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=500&auto=format&fit=crop',
+      avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=500&auto=format&fit=crop',
+      about_image_url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=500&auto=format&fit=crop',
     });
-    console.log('✅ Default profile seeded');
+    console.log('✅ Official profile seeded');
   } catch (e) {
     console.log('⚠️  Failed to seed profile', e);
   }
 
-  // 2. Seed Skills
+  // 3. Seed Core Technical Skills
   const skills = [
-    { name: 'Next.js', category: 'frontend', level: 'Expert', order: 1 },
-    { name: 'React', category: 'frontend', level: 'Expert', order: 2 },
+    // Languages
+    { name: 'Python', category: 'backend', level: 'Expert', order: 1 },
+    { name: 'JavaScript', category: 'frontend', level: 'Expert', order: 2 },
     { name: 'TypeScript', category: 'frontend', level: 'Advanced', order: 3 },
-    { name: 'Tailwind CSS', category: 'frontend', level: 'Advanced', order: 4 },
-    { name: 'Framer Motion', category: 'frontend', level: 'Intermediate', order: 5 },
-    { name: 'NestJS', category: 'backend', level: 'Expert', order: 6 },
-    { name: 'Node.js', category: 'backend', level: 'Expert', order: 7 },
-    { name: 'Django', category: 'backend', level: 'Advanced', order: 8 },
-    { name: 'FastAPI', category: 'backend', level: 'Intermediate', order: 9 },
-    { name: 'GraphQL', category: 'backend', level: 'Intermediate', order: 10 },
-    { name: 'PostgreSQL', category: 'database', level: 'Advanced', order: 11 },
-    { name: 'MongoDB', category: 'database', level: 'Advanced', order: 12 },
-    { name: 'Redis', category: 'database', level: 'Intermediate', order: 13 },
-    { name: 'Docker', category: 'tools', level: 'Advanced', order: 14 },
-    { name: 'Git & GitHub', category: 'tools', level: 'Expert', order: 15 },
-    { name: 'AWS', category: 'tools', level: 'Intermediate', order: 16 },
-    { name: 'CI/CD', category: 'tools', level: 'Advanced', order: 17 },
+    { name: 'PHP', category: 'backend', level: 'Advanced', order: 4 },
+    { name: 'HTML5', category: 'frontend', level: 'Expert', order: 5 },
+    { name: 'CSS3', category: 'frontend', level: 'Expert', order: 6 },
+    { name: 'SQL', category: 'database', level: 'Advanced', order: 7 },
+
+    // Frameworks
+    { name: 'Django', category: 'backend', level: 'Expert', order: 8 },
+    { name: 'Next.js', category: 'frontend', level: 'Advanced', order: 9 },
+    { name: 'NestJS', category: 'backend', level: 'Advanced', order: 10 },
+    { name: 'Bootstrap', category: 'frontend', level: 'Advanced', order: 11 },
+    { name: 'jQuery', category: 'frontend', level: 'Advanced', order: 12 },
+
+    // Databases
+    { name: 'MySQL', category: 'database', level: 'Expert', order: 13 },
+    { name: 'SQLite', category: 'database', level: 'Advanced', order: 14 },
+    { name: 'Database Design', category: 'database', level: 'Advanced', order: 15 },
+    { name: 'REST APIs', category: 'backend', level: 'Advanced', order: 16 },
+
+    // Data & Analysis
+    { name: 'Pandas', category: 'data analysis', level: 'Advanced', order: 17 },
+    { name: 'NumPy', category: 'data analysis', level: 'Advanced', order: 18 },
+    { name: 'Excel Dashboards', category: 'data analysis', level: 'Expert', order: 19 },
+    { name: 'Pivot Tables', category: 'data analysis', level: 'Expert', order: 20 },
+    { name: 'Data Visualization', category: 'data analysis', level: 'Advanced', order: 21 },
+
+    // Tools & DevOps
+    { name: 'Git & GitHub', category: 'tools', level: 'Expert', order: 22 },
+    { name: 'VS Code', category: 'tools', level: 'Expert', order: 23 },
+    { name: 'XAMPP', category: 'tools', level: 'Advanced', order: 24 },
+    { name: 'cPanel', category: 'tools', level: 'Advanced', order: 25 },
+    { name: 'Postman', category: 'tools', level: 'Advanced', order: 26 },
   ];
 
   for (const skill of skills) {
     try {
       await skillsService.create(skill);
     } catch (e) {
-      // skill likely already exists
+      console.log(`⚠️ Failed to seed skill ${skill.name}`);
     }
   }
-  console.log('✅ Skills seeded');
+  console.log('✅ Technical skills successfully seeded');
 
-  // 3. Seed Featured Projects
+  // 4. Seed Professional Experience
+  const experiences = [
+    {
+      company: 'Mindset Information Technology',
+      position: 'Full-Stack Web Developer',
+      period: '2022 – Present',
+      description: '• Designed and developed 4+ dynamic web applications using HTML, CSS, JavaScript, PHP, and MySQL for blogs, e-commerce, and booking systems.\n• Engineered responsive, mobile-first UIs that reduced bounce rates and improved overall UX.\n• Built secure user authentication systems, relational database schemas, and RESTful backend APIs.\n• Optimized web app performance through database query tuning, caching, and code refactorings, reducing load times by up to 40%.\n• Managed entire software development lifecycle, from gathering requirements and prototyping to final deployment on cPanel-hosted production environments.',
+      order: 1,
+    },
+    {
+      company: 'Tee-Dev',
+      position: 'Python Developer (Contract)',
+      period: '2023 (2 Months)',
+      description: '• Contributed to the backend development of a robust FinTech application using Python and Django, implementing core payment and transactional models.\n• Integrated multiple third-party financial REST APIs for processing secure payouts and retrieving customer history.\n• Wrote custom automated scripts that optimized backend data processing, reducing manual data entry workflows by 60%.\n• Maintained structured local database storage using SQLite and participated in sprint meetings.',
+      order: 2,
+    },
+    {
+      company: 'Quantum Innovation STEAM Academy',
+      position: 'Technical Instructor — Programming & Web Development',
+      period: '2020 – 2025',
+      description: '• Delivered structured programming instruction to 100+ students from beginner to intermediate levels, covering HTML, CSS, JavaScript, Python, and PHP.\n• Authored comprehensive, hands-on programming curricula focused on practical project-based learning.\n• Mentored students through complex capstone engineering projects, improving final graduation and completion rates.\n• Managed intensive coding labs and weekly workshops translating challenging software principles into accessible steps.\n• Created durable slide decks, coding exercises, and lesson guides deployed across multiple tech cohorts.',
+      order: 3,
+    },
+  ];
+
+  for (const exp of experiences) {
+    try {
+      await experienceService.create(exp);
+    } catch (e) {
+      console.log(`⚠️ Failed to seed experience for ${exp.company}`);
+    }
+  }
+  console.log('✅ Professional experience successfully seeded');
+
+  // 5. Seed Projects
   const projects = [
     {
-      title: 'Enterprise CRM Platform',
-      slug: 'enterprise-crm',
-      description: 'A robust CRM system built for large-scale enterprises with real-time analytics, pipeline management, and automated workflows. Handles 10,000+ contacts and integrates with popular email and calendar services.',
-      tech_stack: ['Next.js', 'NestJS', 'PostgreSQL', 'Redis', 'Tailwind CSS'],
+      title: 'Agro Market Platform',
+      slug: 'agro-market-platform',
+      description: 'A full-stack agricultural marketplace connecting farmers, buyers, and agri-enthusiasts — enabling product listing, search, and transaction management. Features a highly modular NestJS architecture with TypeScript, ensuring end-to-end type safety and optimal scaling across payment integrations, user profile databases, and marketplace listings.',
+      tech_stack: ['NestJS', 'TypeScript', 'REST API', 'Node.js', 'PostgreSQL'],
       featured: true,
       category: 'Web App',
       github_url: 'https://github.com/ProfHezzy',
+      image: 'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?q=80&w=600&auto=format&fit=crop',
     },
     {
-      title: 'AI Image Generator',
-      slug: 'ai-image-gen',
-      description: 'A cutting-edge tool leveraging Stable Diffusion to generate high-quality, photorealistic images from text prompts. Features prompt templates, image history, and batch generation.',
-      tech_stack: ['React', 'Python', 'FastAPI', 'PyTorch', 'AWS S3'],
-      featured: true,
-      category: 'AI & ML',
-      github_url: 'https://github.com/ProfHezzy',
-    },
-    {
-      title: 'Crypto Wallet Tracker',
-      slug: 'crypto-tracker',
-      description: 'Real-time tracking of multiple crypto wallets across Ethereum, Bitcoin, and Solana chains. Features price alerts, portfolio analytics, and historical charts powered by WebSocket connections.',
-      tech_stack: ['Next.js', 'Go', 'Redis', 'Web3.js', 'Chart.js'],
+      title: 'Community Finance App',
+      slug: 'community-finance-app',
+      description: 'A custom community finance management platform designed to track contributions, microloans, and payouts within traditional local savings groups (the ajo/esusu model). Features custom Django database schemas, relational transaction history, secure user authentication roles, automated balance calculations, and comprehensive PDF financial reports.',
+      tech_stack: ['Python', 'Django', 'SQLite', 'Django ORM', 'Bootstrap'],
       featured: true,
       category: 'FinTech',
       github_url: 'https://github.com/ProfHezzy',
+      image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=600&auto=format&fit=crop',
     },
     {
-      title: 'Developer Learning Platform',
-      slug: 'dev-learning-platform',
-      description: 'An interactive e-learning platform for aspiring developers with video courses, coding challenges, and mentorship sessions. Hosts 2,000+ students across 50+ structured courses.',
-      tech_stack: ['Next.js', 'Django', 'PostgreSQL', 'Stripe', 'AWS CloudFront'],
-      featured: false,
-      category: 'EdTech',
+      title: 'Travel Booking Platform',
+      slug: 'travel-booking-platform',
+      description: 'A high-performance travel service and tour booking platform offering real-time seat availability checks, email booking confirmations, payment checkout flows, and a comprehensive admin management dashboard. Built using a normalized relational MySQL schema capable of scaling under high booking concurrency.',
+      tech_stack: ['PHP', 'MySQL', 'JavaScript', 'HTML5', 'CSS3'],
+      featured: true,
+      category: 'Web App',
       github_url: 'https://github.com/ProfHezzy',
+      image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=600&auto=format&fit=crop',
     },
     {
-      title: 'Real-Time Chat Application',
-      slug: 'realtime-chat',
-      description: 'A WhatsApp-like messaging application built with Socket.io supporting group chats, file sharing, voice messages, and end-to-end encryption for private conversations.',
-      tech_stack: ['React', 'NestJS', 'Socket.io', 'MongoDB', 'WebRTC'],
+      title: 'Blog & Content Management System',
+      slug: 'blog-cms',
+      description: 'A multi-user content management system boasting custom role-based access controls (administrator, author, reader tiers). Incorporates rich text document editors, tags and category search indices, fully integrated CRUD controllers, search engines, and a real-time comments moderation dashboard for the admin.',
+      tech_stack: ['PHP', 'MySQL', 'JavaScript', 'HTML5', 'CSS3'],
       featured: false,
       category: 'Web App',
       github_url: 'https://github.com/ProfHezzy',
-    },
-    {
-      title: 'Smart Invoice & Billing SaaS',
-      slug: 'invoice-billing-saas',
-      description: 'A B2B SaaS platform for freelancers and agencies to generate invoices, track payments, and manage client relationships — with PDF export and payment gateway integrations.',
-      tech_stack: ['Next.js', 'NestJS', 'PostgreSQL', 'Stripe', 'PDFKit'],
-      featured: false,
-      category: 'SaaS',
-      github_url: 'https://github.com/ProfHezzy',
+      image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=600&auto=format&fit=crop',
     },
   ];
 
@@ -147,42 +249,120 @@ async function bootstrap() {
     try {
       await projectsService.create(project);
     } catch (e) {
-      // project likely already exists
+      console.log(`⚠️ Failed to seed project: ${project.title}`);
     }
   }
-  console.log('✅ Featured projects seeded');
+  console.log('✅ Projects successfully seeded');
 
-  // 4. Seed Blog Posts
+  // 6. Seed Education (Academics)
+  const academics = [
+    {
+      institution: 'Ronik Polytechnic',
+      degree: 'Higher National Diploma (HND) — Computer Science',
+      period: '2020 – 2022',
+      grade: 'Distinction / Upper Credit Core',
+      order: 1,
+    },
+    {
+      institution: 'Ronik Polytechnic',
+      degree: 'National Diploma (ND) — Computer Science',
+      period: '2017 – 2019',
+      grade: 'Distinction / Upper Credit Core',
+      order: 2,
+    },
+    {
+      institution: 'Central High School',
+      degree: 'Senior Secondary Certificate (SSCE)',
+      period: '2010 – 2013',
+      grade: 'SSCE Graduate',
+      order: 3,
+    },
+  ];
+
+  for (const acad of academics) {
+    try {
+      await academicService.create(acad);
+    } catch (e) {
+      console.log(`⚠️ Failed to seed academic stage for ${acad.degree}`);
+    }
+  }
+  console.log('✅ Academic history successfully seeded');
+
+  // 7. Seed Certifications
+  const certifications = [
+    {
+      title: 'Python for Everyone',
+      issuer: 'Udemy',
+      date: 'Udemy Certificate',
+      link: 'https://udemy.com',
+      order: 1,
+    },
+    {
+      title: 'Python Programming',
+      issuer: 'Cisco',
+      date: 'Cisco Networking Academy',
+      link: 'https://cisco.com',
+      order: 2,
+    },
+    {
+      title: 'HTML, CSS & JavaScript',
+      issuer: 'Udemy',
+      date: 'Udemy Certificate',
+      link: 'https://udemy.com',
+      order: 3,
+    },
+    {
+      title: 'SQL Language',
+      issuer: 'Coursera',
+      date: 'Coursera Verification',
+      link: 'https://coursera.org',
+      order: 4,
+    },
+  ];
+
+  for (const cert of certifications) {
+    try {
+      await certificationService.create(cert);
+    } catch (e) {
+      console.log(`⚠️ Failed to seed certification: ${cert.title}`);
+    }
+  }
+  console.log('✅ Certifications successfully seeded');
+
+  // 8. Seed custom blog posts matching Hezekiah's actual core focus
   const posts = [
     {
-      title: 'Building Scalable REST APIs with NestJS and TypeORM',
-      slug: 'nestjs-typeorm-rest-api',
-      excerpt: 'A deep dive into architecting production-grade REST APIs using NestJS, TypeORM, and PostgreSQL — covering guards, interceptors, and advanced TypeORM patterns.',
-      content: '<h2>Introduction</h2><p>NestJS is an opinionated Node.js framework that makes it easy to build maintainable, testable server-side applications. In this post, we explore how to structure a scalable REST API using NestJS and TypeORM.</p><h2>Setting Up the Project</h2><p>Start by scaffolding the application using the NestJS CLI and configuring TypeORM with a PostgreSQL database connection...</p>',
+      title: 'Why NestJS is My Go-To Framework for Modular APIs',
+      slug: 'why-nestjs-is-my-go-to-framework',
+      excerpt: 'NestJS brings robust modular architecture and strict TypeScript typing to Node.js backend systems. In this article, I explore why it stands out for enterprise developer productivity.',
+      content: '<h2>Introduction</h2><p>Building maintainable web applications requires opinionated guidelines. NestJS, an outstanding framework built on Node.js and TypeScript, addresses modular organization beautifully.</p><h2>The Core Benefits</h2><p>1. <strong>Strong Type Safety:</strong> Leveraging TypeScript interfaces and models reduces bugs before runtime.<br/>2. <strong>Modular Codebase:</strong> Modules, controllers, and services ensure concerns are segregated correctly.<br/>3. <strong>Built-in Dependency Injection:</strong> Simplifies unit testing and decouple components.</p><h2>Conclusion</h2><p>For scalable architectures that need to grow over multiple years, NestJS is unmatched in the Node.js ecosystem.</p>',
       category: 'Backend',
-      read_time: '12',
+      read_time: '8',
       published: true,
-      tags: 'NestJS,TypeORM,PostgreSQL,REST API',
+      tags: 'NestJS,TypeScript,Backend,Architecture',
+      cover_image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop',
     },
     {
-      title: 'The Art of Component Architecture in Next.js',
-      slug: 'nextjs-component-architecture',
-      excerpt: 'How to think about component composition, co-location, and the right abstractions for building large-scale Next.js applications that your team will love working in.',
-      content: '<h2>Why Architecture Matters</h2><p>As your Next.js application grows, poorly structured components become a burden. Good architecture enables faster feature development, easier testing, and better collaboration.</p><h2>Atomic Design Principles</h2><p>Adopt atomic design — organize components as atoms, molecules, organisms, and templates...</p>',
-      category: 'Frontend',
+      title: 'Mastering Django ORM for Financial Ledger Calculations',
+      slug: 'mastering-django-orm-fintech',
+      excerpt: 'A practical, developer-focused dive into using Django ORM to record complex financial balances, transactional states, and ledger entries cleans and securely.',
+      content: '<h2>Handling Community Savings Models</h2><p>In community-based cooperative banking (ajo/esusu models), double-entry security is critical. The database layer must prevent balance arithmetic anomalies under concurrency.</p><h2>Best Practices in Django ORM</h2><p>1. <strong>Transaction Atomicity:</strong> Always wrap deposit payouts in <code>transaction.atomic()</code>.<br/>2. <strong>F-Expressions:</strong> Prevent race conditions by updating database numeric fields relatively: <code>F(\'balance\') + amount</code>.<br/>3. <strong>Normalized Ledgers:</strong> Avoid saving derived balances directly; rely on dynamic database aggregations over clean transaction records.</p>',
+      category: 'Backend',
       read_time: '10',
       published: true,
-      tags: 'Next.js,React,Architecture,Components',
+      tags: 'Django,Python,FinTech,ORM',
+      cover_image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=600&auto=format&fit=crop',
     },
     {
-      title: 'Mastering Docker for Full-Stack Development',
-      slug: 'docker-fullstack-guide',
-      excerpt: 'A practical guide to containerizing your full-stack applications with Docker and Docker Compose — from local development to production deployments.',
-      content: '<h2>Why Docker?</h2><p>Docker eliminates the infamous "works on my machine" problem by providing a consistent environment from development to production.</p><h2>Writing Your First Dockerfile</h2><p>Start with a minimal base image and layer your application on top...</p>',
-      category: 'DevOps',
-      read_time: '15',
+      title: 'Building Interactive Excel Dashboards with Pandas Integrations',
+      slug: 'excel-dashboards-pandas-integration',
+      excerpt: 'Excel is still an incredibly powerful tool for business reporting. Discover how to construct data pipelines with Python Pandas, NumPy, and clean dashboards.',
+      content: '<h2>Bypassing Manual Operations</h2><p>Many business workflows are slowed down by manual copy-pasting. Integrating Python Pandas allows us to pre-clean large datasets automatically, generating flawless Excel reporting sheets.</p><h2>Building the Pipeline</h2><p>1. Extract raw transactional Excel sheets with <code>pd.read_excel()</code>.<br/>2. Aggregate data using Pivot Tables inside Pandas: <code>df.pivot_table()</code>.<br/>3. Use xlsxwriter engines in Python to format interactive charts and customized highlights instantly.</p>',
+      category: 'Data Analysis',
+      read_time: '7',
       published: true,
-      tags: 'Docker,DevOps,Deployment,Containers',
+      tags: 'DataAnalysis,Excel,Pandas,Visualization',
+      cover_image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop',
     },
   ];
 
@@ -190,55 +370,15 @@ async function bootstrap() {
     try {
       await blogService.create(post);
     } catch (e) {
-      // post likely already exists
+      console.log(`⚠️ Failed to seed blog post: ${post.title}`);
     }
   }
-  console.log('✅ Blog posts seeded');
+  console.log('✅ Custom blog posts successfully seeded');
 
-  // 5. Seed Experience
-  const experiences = [
-    { company: 'Tech Innovators Inc.', position: 'Senior Full-Stack Developer', period: 'Jan 2022 - Present', description: 'Lead development of enterprise cloud solutions using Next.js and NestJS. Managed a team of 5 developers.', order: 1 },
-    { company: 'Digital Solutions Ltd.', position: 'Full-Stack Developer', period: 'Mar 2020 - Dec 2021', description: 'Developed and maintained various client websites and internal tools. Focused on React and Node.js.', order: 2 },
-    { company: 'Startup Hub', position: 'Junior Web Developer', period: 'Jun 2018 - Feb 2020', description: 'Built responsive web interfaces and assisted in backend development with Django.', order: 3 },
-  ];
-
-  for (const exp of experiences) {
-    try {
-      await experienceService.create(exp);
-    } catch (e) {}
-  }
-  console.log('✅ Experience seeded');
-
-  // 6. Seed Academics
-  const academics = [
-    { institution: 'Federal University of Technology', degree: 'B.Tech in Computer Science', period: '2014 - 2019', grade: 'First Class Honors', order: 1 },
-    { institution: 'Lagos State Polytechnic', degree: 'National Diploma in Computer Engineering', period: '2012 - 2014', grade: 'Distinction', order: 2 },
-  ];
-
-  for (const acad of academics) {
-    try {
-      await academicService.create(acad);
-    } catch (e) {}
-  }
-  console.log('✅ Academics seeded');
-
-  // 7. Seed Certifications
-  const certifications = [
-    { title: 'AWS Certified Solutions Architect', issuer: 'Amazon Web Services', date: 'Mar 2023', link: '#', order: 1 },
-    { title: 'Professional Scrum Master I', issuer: 'Scrum.org', date: 'Nov 2022', link: '#', order: 2 },
-    { title: 'Google Professional Cloud Developer', issuer: 'Google Cloud', date: 'Jan 2022', link: '#', order: 3 },
-  ];
-
-  for (const cert of certifications) {
-    try {
-      await certificationService.create(cert);
-    } catch (e) {}
-  }
-  console.log('✅ Certifications seeded');
-
-  console.log('\n🚀 Seeding complete!');
-  console.log('🌐 Frontend: http://localhost:3000');
-  console.log('📡 Backend:  http://localhost:3001');
+  console.log('\n🚀 Database seeding is complete!');
+  console.log('📁 Your official resume data has been loaded.');
+  console.log('🌐 Local Frontend: http://localhost:3000');
+  console.log('📡 Local Backend:  http://localhost:3001');
   
   await app.close();
 }

@@ -45,7 +45,7 @@ function ResetPasswordForm() {
     return (
       <div className="text-center py-8">
         <p className="text-red-500 font-bold mb-6">Invalid Reset Link</p>
-        <Link href="/admin/forgot-password" size={24} className="btn-primary w-full">Request New Link</Link>
+        <Link href="/admin/forgot-password" className="btn-primary w-full">Request New Link</Link>
       </div>
     );
   }

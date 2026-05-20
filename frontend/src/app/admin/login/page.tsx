@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Loader2, Lock, User, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -86,9 +87,9 @@ export default function AdminLoginPage() {
               </div>
               {errors.password && <p className="text-xs text-red-400 font-medium">{errors.password.message as string}</p>}
               <div className="flex justify-end">
-                <a href="/admin/forgot-password" size={14} className="text-[10px] font-bold text-slate-500 hover:text-primary transition-colors uppercase tracking-widest">
+                <Link href="/admin/forgot-password" className="text-[10px] font-bold text-slate-500 hover:text-primary transition-colors uppercase tracking-widest">
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
 

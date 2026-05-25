@@ -1,10 +1,12 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Link from 'next/link';
-import { Briefcase, BookOpen, Award, MessageSquare, TrendingUp, ArrowRight, Plus, Loader2, CheckCircle, Clock } from 'lucide-react';
+import { Briefcase, BookOpen, Award, MessageSquare, TrendingUp, ArrowRight, Plus, Loader2, CheckCircle, Clock, Bot, Sparkles, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function AdminDashboard() {
   const { data: statsData } = useQuery({ 
@@ -112,6 +114,9 @@ export default function AdminDashboard() {
 
         {/* Quick Actions + Activity */}
         <div className="space-y-5">
+          {/* AI Blog Autopilot */}
+          <AiBlogPanel />
+
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100">
@@ -164,6 +169,58 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AiBlogPanel() {
+  const [lastResult, setLastResult] = useState<string | null>(null);
+
+  const generateMutation = useMutation({
+    mutationFn: () => api.post('/ai-blog/generate').then(r => r.data),
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success('AI blog post published!');
+        setLastResult(`✅ Published: "${data.message.replace('✅ Blog post published: ', '').replace(/"/g, '')}"`);
+      } else {
+        toast.error('AI generation failed');
+        setLastResult(`❌ ${data.message}`);
+      }
+    },
+    onError: () => {
+      toast.error('Could not connect to AI service');
+      setLastResult('❌ Connection failed. Check your Gemini API key.');
+    },
+  });
+
+  return (
+    <div className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl overflow-hidden text-white">
+      <div className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Bot size={18} className="text-violet-200" />
+          <h3 className="font-bold text-sm">AI Blog Autopilot</h3>
+          <span className="ml-auto flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
+            <Zap size={9} /> Daily 8AM
+          </span>
+        </div>
+        <p className="text-violet-200 text-xs leading-relaxed mb-4">
+          Gemini AI posts a fresh tech article every morning. Click to publish one right now.
+        </p>
+        <button
+          onClick={() => generateMutation.mutate()}
+          disabled={generateMutation.isPending}
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-white text-purple-700 font-black text-sm rounded-xl hover:bg-violet-50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {generateMutation.isPending ? (
+            <><Loader2 size={15} className="animate-spin" /> Generating...</>
+          ) : (
+            <><Sparkles size={15} /> Generate Post Now</>
+          )}
+        </button>
+        {lastResult && (
+          <p className="text-[10px] text-violet-200 mt-2 text-center">{lastResult}</p>
+        )}
       </div>
     </div>
   );

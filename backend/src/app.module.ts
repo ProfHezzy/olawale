@@ -16,6 +16,7 @@ import { ExperienceModule } from './experience/experience.module';
 import { AcademicsModule } from './academics/academic.module';
 import { CertificationModule } from './certifications/certification.module';
 import { CommentsModule } from './comments/comments.module';
+import { AiBlogModule } from './ai-blog/ai-blog.module';
 
 @Module({
   imports: [
@@ -32,14 +33,14 @@ import { CommentsModule } from './comments/comments.module';
       useFactory: (configService: ConfigService) => {
         const url = configService.get<string>('DATABASE_URL');
         const nodeEnv = configService.get<string>('NODE_ENV');
-        
+
         if (url) {
           console.log('Database connection: Using DATABASE_URL');
           return {
             type: 'postgres',
             url,
             autoLoadEntities: true,
-            synchronize: true, // Enable for initial deployment to create tables
+            synchronize: true,
             ssl: nodeEnv === 'production' ? { rejectUnauthorized: false } : false,
           };
         }
@@ -53,7 +54,7 @@ import { CommentsModule } from './comments/comments.module';
           password: configService.get<string>('DATABASE_PASSWORD'),
           database: configService.get<string>('DATABASE_NAME'),
           autoLoadEntities: true,
-          synchronize: true, // Enable for initial deployment
+          synchronize: true,
         };
       },
     }),
@@ -62,6 +63,7 @@ import { CommentsModule } from './comments/comments.module';
     SkillsModule,
     MessagesModule,
     AuthModule,
+    AdminModule,
     ProfileModule,
     UploadModule,
     MailModule,
@@ -69,6 +71,7 @@ import { CommentsModule } from './comments/comments.module';
     AcademicsModule,
     CertificationModule,
     CommentsModule,
+    AiBlogModule,
   ],
 })
 export class AppModule {}

@@ -250,9 +250,33 @@ Return ONLY a valid JSON object (no markdown, no backticks):
       return { success: false, error: 'GEMINI_API_KEY not configured' };
     }
 
+    const configuredModel = this.configService.get<string>('GEMINI_MODEL') || 'gemini-1.5-flash';
+    const modelsToTry = [configuredModel, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+    const uniqueModels = Array.from(new Set(modelsToTry));
+
+    let result: any = null;
+    let lastError: any = null;
+    let usedModelName = '';
+
+    for (const modelName of uniqueModels) {
+      try {
+        this.logger.log(`🤖 Attempting content generation with model: ${modelName}...`);
+        const model = this.genAI.getGenerativeModel({ model: modelName });
+        result = await model.generateContent(prompt);
+        usedModelName = modelName;
+        break; // Successfully generated content
+      } catch (err: any) {
+        lastError = err;
+        this.logger.warn(`⚠️  Model ${modelName} failed: ${err.message || err}`);
+      }
+    }
+
+    if (!result) {
+      this.logger.error(`❌ All models failed. Last error: ${lastError?.message || lastError}`);
+      return { success: false, error: `All models failed: ${lastError?.message || lastError}` };
+    }
+
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const result = await model.generateContent(prompt);
       const responseText = result.response.text().trim();
 
       let parsed: { title: string; excerpt: string; content: string };
@@ -286,10 +310,10 @@ Return ONLY a valid JSON object (no markdown, no backticks):
         cover_image: this.getCoverImage(category),
       });
 
-      this.logger.log(`✅ Published [${category}]: "${parsed.title}"`);
+      this.logger.log(`✅ Published [${category}] using ${usedModelName}: "${parsed.title}"`);
       return { success: true, title: parsed.title };
     } catch (error: any) {
-      this.logger.error(`❌ Failed: ${error.message}`);
+      this.logger.error(`❌ Publishing failed: ${error.message}`);
       return { success: false, error: error.message };
     }
   }

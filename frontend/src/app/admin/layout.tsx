@@ -4,13 +4,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Briefcase, BookOpen, Award, MessageSquare, Settings, LogOut, User, Menu, X, Globe, GraduationCap, Wrench, Mail
+  LayoutDashboard, Briefcase, BookOpen, Award, MessageSquare, Settings, LogOut, User, Menu, X, Globe, GraduationCap, Wrench, Mail, BarChart2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 const sidebarLinks = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
   { name: 'Projects', href: '/admin/projects', icon: Briefcase },
   { name: 'Experience', href: '/admin/experience', icon: Briefcase },
   { name: 'Blog', href: '/admin/blog', icon: BookOpen },

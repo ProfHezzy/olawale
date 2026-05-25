@@ -71,7 +71,8 @@ export default function AdminSettingsPage() {
       const res = await api.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const fullUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${res.data.url}`;
+      // Cloudinary returns an absolute URL, so no need to prefix with backend URL
+      const fullUrl = res.data.url;
       setValue(fieldName, fullUrl, { shouldDirty: true, shouldValidate: true });
       toast.success('Image uploaded!');
     } catch (error) {

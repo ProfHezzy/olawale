@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { inter, jetbrainsMono } from "@/lib/fonts";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 export const metadata: Metadata = {
   title: "Hezekiah Olawale Ojenike | Full-Stack Developer",
@@ -39,6 +40,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased bg-white text-slate-900">
         <Providers>
+          <AnalyticsTracker />
           {children}
         </Providers>
       </body>

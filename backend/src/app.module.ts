@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectsModule } from './projects/projects.module';
 import { BlogModule } from './blog/blog.module';
@@ -17,16 +15,14 @@ import { AcademicsModule } from './academics/academic.module';
 import { CertificationModule } from './certifications/certification.module';
 import { CommentsModule } from './comments/comments.module';
 import { AiBlogModule } from './ai-blog/ai-blog.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',
-    }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -72,6 +68,7 @@ import { AiBlogModule } from './ai-blog/ai-blog.module';
     CertificationModule,
     CommentsModule,
     AiBlogModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

@@ -21,6 +21,24 @@ async function bootstrap() {
   const academicService = app.get(AcademicService);
   const certificationService = app.get(CertificationService);
 
+  // Check if database already has content to protect user updates
+  try {
+    const existingProjects = await projectsService.findAll();
+    const existingSkills = await skillsService.findAll();
+    const hasData = existingProjects.length > 0 || existingSkills.length > 0;
+    const forceSeed = process.argv.includes('--force') || process.argv.includes('-f');
+    
+    if (hasData && !forceSeed) {
+      console.log('⚠️  Database already contains existing projects or skills.');
+      console.log('⏭️  Skipping database seed to protect your custom changes!');
+      console.log('💡 Tip: If you explicitly want to reset and re-seed, run: npm run seed -- --force');
+      await app.close();
+      return;
+    }
+  } catch (e) {
+    console.log('Checking database status failed, proceeding with seed...', e);
+  }
+
   console.log('🌱 Seeding database with Hezekiah Olawale Ojenike\'s official CV...');
 
   // 0. Database Cleanup (prevents duplicates when re-seeding)

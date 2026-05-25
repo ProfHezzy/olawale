@@ -176,46 +176,78 @@ export default function AdminDashboard() {
 
 function AiBlogPanel() {
   const [lastResult, setLastResult] = useState<string | null>(null);
+  const [generating, setGenerating] = useState<string | null>(null);
 
-  const generateMutation = useMutation({
-    mutationFn: () => api.post('/ai-blog/generate').then(r => r.data),
-    onSuccess: (data) => {
-      if (data.success) {
+  const handleGenerate = async (type: string) => {
+    setGenerating(type);
+    setLastResult(null);
+    try {
+      const res = await api.post(`/ai-blog/generate?type=${type}`);
+      if (res.data.success) {
         toast.success('AI blog post published!');
-        setLastResult(`✅ Published: "${data.message.replace('✅ Blog post published: ', '').replace(/"/g, '')}"`);
+        setLastResult(`✅ ${res.data.message}`);
       } else {
-        toast.error('AI generation failed');
-        setLastResult(`❌ ${data.message}`);
+        toast.error('Generation failed');
+        setLastResult(`❌ ${res.data.message}`);
       }
-    },
-    onError: () => {
+    } catch {
       toast.error('Could not connect to AI service');
       setLastResult('❌ Connection failed. Check your Gemini API key.');
-    },
-  });
+    } finally {
+      setGenerating(null);
+    }
+  };
+
+  const buttons = [
+    { type: 'expertise', label: '📝 Article', color: 'bg-white/20 hover:bg-white/30' },
+    { type: 'news', label: '📰 Tech News', color: 'bg-white/20 hover:bg-white/30' },
+    { type: 'jobs', label: '💼 Job Board', color: 'bg-white/20 hover:bg-white/30' },
+  ];
 
   return (
     <div className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl overflow-hidden text-white">
       <div className="p-5">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-2">
           <Bot size={18} className="text-violet-200" />
           <h3 className="font-bold text-sm">AI Blog Autopilot</h3>
-          <span className="ml-auto flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
-            <Zap size={9} /> Daily 8AM
+        </div>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
+            <Zap size={9} /> 8AM
           </span>
+          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
+            <Zap size={9} /> 2PM
+          </span>
+          <span className="text-[10px] text-violet-300">Daily WAT</span>
         </div>
         <p className="text-violet-200 text-xs leading-relaxed mb-4">
-          Gemini AI posts a fresh tech article every morning. Click to publish one right now.
+          Gemini AI auto-posts articles, tech news &amp; job listings. Click below to publish one now.
         </p>
+        <div className="grid grid-cols-3 gap-2 mb-2">
+          {buttons.map((btn) => (
+            <button
+              key={btn.type}
+              onClick={() => handleGenerate(btn.type)}
+              disabled={generating !== null}
+              className={`flex items-center justify-center gap-1 py-2 text-[11px] font-bold rounded-lg transition-all disabled:opacity-50 ${btn.color}`}
+            >
+              {generating === btn.type ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                btn.label
+              )}
+            </button>
+          ))}
+        </div>
         <button
-          onClick={() => generateMutation.mutate()}
-          disabled={generateMutation.isPending}
+          onClick={() => handleGenerate('expertise')}
+          disabled={generating !== null}
           className="w-full flex items-center justify-center gap-2 py-2.5 bg-white text-purple-700 font-black text-sm rounded-xl hover:bg-violet-50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {generateMutation.isPending ? (
+          {generating ? (
             <><Loader2 size={15} className="animate-spin" /> Generating...</>
           ) : (
-            <><Sparkles size={15} /> Generate Post Now</>
+            <><Sparkles size={15} /> Quick Generate</>
           )}
         </button>
         {lastResult && (

@@ -19,16 +19,42 @@ type BlogPost = {
 function ShareDropdown({ post }: { post: BlogPost }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pos, setPos] = useState({ top: 0, right: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   // Close when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node) &&
+          btnRef.current && !btnRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Recalculate position on scroll/resize
+  useEffect(() => {
+    if (!open) return;
+    const update = () => {
+      if (!btnRef.current) return;
+      const rect = btnRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
+    };
+    update();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => { window.removeEventListener('scroll', update, true); window.removeEventListener('resize', update); };
+  }, [open]);
+
+  const handleOpen = () => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    setPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
+    setOpen(o => !o);
+  };
 
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
   const title = encodeURIComponent(post.title);
@@ -108,7 +134,8 @@ function ShareDropdown({ post }: { post: BlogPost }) {
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen(o => !o)}
+        ref={btnRef}
+        onClick={handleOpen}
         title="Share to socials"
         className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
       >
@@ -116,7 +143,10 @@ function ShareDropdown({ post }: { post: BlogPost }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-10 z-50 bg-white border border-slate-100 rounded-2xl shadow-2xl shadow-slate-200/60 p-1.5 min-w-[180px] animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div 
+          style={{ position: 'fixed', top: pos.top, right: pos.right }}
+          className="z-50 bg-white border border-slate-100 rounded-2xl shadow-2xl shadow-slate-200/60 p-1.5 min-w-[180px] animate-in fade-in slide-in-from-bottom-2 duration-150"
+        >
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 pt-2 pb-1">Share Post</p>
           {shares.map(s => (
             <button

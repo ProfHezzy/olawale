@@ -261,6 +261,26 @@ async function bootstrap() {
       github_url: 'https://github.com/ProfHezzy',
       image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=600&auto=format&fit=crop',
     },
+    {
+      title: 'Advanced Developer Portfolio & Admin',
+      slug: 'developer-portfolio',
+      description: 'A highly dynamic, SEO-optimized personal developer portfolio built with Next.js App Router and a NestJS backend. Features a secure custom admin dashboard for managing blogs, projects, and skills. Integrates an AI Autopilot that automatically generates tech articles and job listings using Google Gemini, plus Cloudinary integration for persistent media storage.',
+      tech_stack: ['Next.js', 'NestJS', 'TypeScript', 'Tailwind CSS', 'PostgreSQL'],
+      featured: true,
+      category: 'Web App',
+      github_url: 'https://github.com/ProfHezzy/olawale',
+      image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=600&auto=format&fit=crop',
+    },
+    {
+      title: 'TestPeak (CBT System)',
+      slug: 'testpeak-cbt-system',
+      description: 'TestPeak is a robust Computer-Based Testing (CBT) platform designed for schools and institutions to conduct seamless, timed digital examinations. Includes a secure examiner dashboard for question banking, real-time result grading, anti-cheat test window monitoring, and automated student performance analytics.',
+      tech_stack: ['Node.js', 'React', 'TypeScript', 'MongoDB', 'Express'],
+      featured: true,
+      category: 'EdTech',
+      github_url: 'https://github.com/ProfHezzy',
+      image: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?q=80&w=600&auto=format&fit=crop',
+    },
   ];
 
   for (const project of projects) {

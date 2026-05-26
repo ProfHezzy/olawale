@@ -17,7 +17,7 @@ const GithubIcon = ({ size = 16 }: { size?: number }) => (
 type Project = {
   id: string; title: string; slug: string; description: string;
   tech_stack: string[] | string; category: string; featured: boolean;
-  github_url: string; live_url: string;
+  github_url: string; live_url: string; image?: string;
 };
 
 function ProjectModal({ project, onClose }: { project?: Project | null; onClose: () => void }) {
@@ -34,6 +34,7 @@ function ProjectModal({ project, onClose }: { project?: Project | null; onClose:
       featured: project?.featured || false,
       github_url: project?.github_url || '',
       live_url: project?.live_url || '',
+      image: project?.image || '',
     },
   });
 
@@ -98,8 +99,12 @@ function ProjectModal({ project, onClose }: { project?: Project | null; onClose:
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Live URL</label>
               <input {...register('live_url')} placeholder="https://example.com" className="admin-input" />
             </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Image URL</label>
+              <input {...register('image')} placeholder="https://images.unsplash.com/..." className="admin-input" />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pt-1">
             <input type="checkbox" {...register('featured')} id="featured" className="w-4 h-4 accent-blue-600 rounded" />
             <label htmlFor="featured" className="text-sm font-semibold text-slate-700 cursor-pointer">Mark as Featured</label>
           </div>

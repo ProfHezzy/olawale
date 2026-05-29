@@ -38,20 +38,31 @@ export class AiBlogController {
       throw new UnauthorizedException('Invalid cron secret');
     }
 
-    // Trigger specific job based on time parameter, or let it auto-rotate
-    let result;
-    if (time === 'morning') {
-      result = await this.aiBlogService.generateMorningPost();
-    } else if (time === 'afternoon') {
-      result = await this.aiBlogService.generateAfternoonPost();
-    } else {
-      result = await this.aiBlogService.generateAndPublishPost();
-    }
+    // Trigger asynchronously so the webhook doesn't timeout
+    const triggerBg = async () => {
+      try {
+        let result;
+        if (time === 'morning') {
+          result = await this.aiBlogService.generateMorningPost();
+        } else if (time === 'afternoon') {
+          result = await this.aiBlogService.generateAfternoonPost();
+        } else {
+          result = await this.aiBlogService.generateAndPublishPost();
+        }
+        
+        if (result.success) {
+          console.log(`✅ Background Cron post published: "${result.title}"`);
+        } else {
+          console.error(`❌ Background Cron failed: ${result.error}`);
+        }
+      } catch (err) {
+        console.error(`💥 Background Cron Exception:`, err);
+      }
+    };
 
-    if (result.success) {
-      return { message: `✅ Cron post published: "${result.title}"`, success: true };
-    }
-    return { message: `❌ Cron failed: ${result.error}`, success: false };
+    triggerBg();
+
+    return { message: '✅ Background AI generation started successfully. You can close this connection.', success: true };
   }
 
   /**

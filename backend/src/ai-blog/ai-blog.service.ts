@@ -205,14 +205,12 @@ CRITICAL REQUIREMENTS:
    - Type (Remote 🌍 / Hybrid 🏢 / Onsite 📍)
    - Key Requirements (2-3 bullet points)
    - Apply Link
-4. Use real job board URLs from sites like:
-   - LinkedIn Jobs (linkedin.com/jobs)
-   - Indeed (indeed.com)
-   - Wellfound/AngelList (wellfound.com)
-   - Remote OK (remoteok.com)
-   - We Work Remotely (weworkremotely.com)
-   - Turing (turing.com)
-   - Andela (andela.com)
+4. VERY IMPORTANT - PREVENT BROKEN LINKS: Because specific job posting URLs often expire quickly or result in 404 errors, do NOT guess or hallucinate direct job URLs (like indeed.com/viewjob?jk=123). Instead, the "Apply Link" MUST be a dynamic SEARCH URL for that specific role or company. 
+   For example:
+   - <a href="https://www.linkedin.com/jobs/search?keywords=Company+Name+Job+Title" target="_blank">View on LinkedIn</a>
+   - <a href="https://indeed.com/jobs?q=Company+Name+Job+Title" target="_blank">View on Indeed</a>
+   - <a href="https://remoteok.com/remote-software-engineer-jobs" target="_blank">View on RemoteOK</a>
+   - <a href="https://wellfound.com/jobs" target="_blank">View on Wellfound</a>
 5. Include a mix of Remote, Hybrid, and Onsite roles
 6. Include salary ranges where possible
 7. Add a brief intro paragraph and a tips section at the end with application advice

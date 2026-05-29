@@ -264,6 +264,76 @@ export default function AdminSettingsPage() {
           </div>
         </form>
       </div>
+
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm mt-8">
+        <ChangePasswordForm />
+      </div>
     </div>
+  );
+}
+
+function ChangePasswordForm() {
+  const { register, handleSubmit, formState: { isSubmitting }, reset } = useForm();
+
+  const onSubmit = async (data: any) => {
+    if (data.newPassword !== data.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (data.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+    
+    try {
+      await api.post('/auth/change-password', {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword
+      });
+      toast.success('Password changed successfully!');
+      reset();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to change password');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="divide-y divide-slate-100">
+      <div className="p-8 space-y-6">
+        <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Security & Password
+        </h3>
+        <p className="text-sm text-slate-500">Change your administrator password.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Current Password</label>
+            <input type="password" {...register('currentPassword', { required: true })} className="admin-input" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">New Password</label>
+            <input type="password" {...register('newPassword', { required: true })} className="admin-input" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Confirm New Password</label>
+            <input type="password" {...register('confirmPassword', { required: true })} className="admin-input" />
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-8 bg-slate-50 flex justify-end">
+        <button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="flex items-center gap-2 px-8 py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-colors shadow-lg"
+        >
+          {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : null}
+          Change Password
+        </button>
+      </div>
+    </form>
   );
 }

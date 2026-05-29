@@ -69,4 +69,18 @@ export class AuthService {
     await this.usersRepository.save(user);
     return { message: 'Password updated successfully' };
   }
+
+  async changePassword(userId: string, currentPass: string, newPass: string) {
+    const user = await this.usersRepository.findOne({ where: { id: userId as any } });
+    if (!user) throw new Error('User not found');
+
+    if (!(await bcrypt.compare(currentPass, user.password_hash))) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    user.password_hash = await bcrypt.hash(newPass, 10);
+    await this.usersRepository.save(user);
+    
+    return { message: 'Password changed successfully' };
+  }
 }

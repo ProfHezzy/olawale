@@ -32,7 +32,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setIsMounted(true);
-    if (pathname === '/admin/login') {
+    const publicPaths = ['/admin/login', '/admin/forgot-password', '/admin/reset-password'];
+    if (publicPaths.includes(pathname)) {
       setIsChecking(false);
       return;
     }
@@ -44,7 +45,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [pathname, router]);
 
-  if (!isMounted || (isChecking && pathname !== '/admin/login')) {
+  const isPublicPath = ['/admin/login', '/admin/forgot-password', '/admin/reset-password'].includes(pathname);
+
+  if (!isMounted || (isChecking && !isPublicPath)) {
     return (
       <div className="h-screen w-full bg-slate-950 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -52,7 +55,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (pathname === '/admin/login') return <>{children}</>;
+  if (isPublicPath) return <>{children}</>;
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');

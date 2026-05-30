@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/auth/forgot-password', { email });
+      await api.post('/auth/forgot-password', {});
       setSent(true);
       toast.success('Reset link sent to your email!');
     } catch (error) {
@@ -58,27 +58,17 @@ export default function ForgotPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input
-                  type="email"
-                  required
-                  placeholder="your@email.com"
-                  className="admin-input pl-12"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
+            <p className="text-slate-600 text-sm font-medium bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100">
+              For security, the password reset link will only be sent to the administrator email address on file.
+            </p>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-4 text-lg shadow-lg shadow-blue-500/20 disabled:opacity-70"
+              className="btn-primary w-full py-4 text-lg shadow-lg shadow-blue-500/20 disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              {loading ? <Loader2 className="animate-spin mx-auto" size={24} /> : "Send Reset Link"}
+              {loading ? <Loader2 className="animate-spin" size={24} /> : <Mail size={20} />}
+              {loading ? "Sending..." : "Send Reset Link to My Email"}
             </button>
           </form>
         )}

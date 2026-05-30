@@ -38,7 +38,7 @@ export class AuthService {
     return this.usersRepository.save(user);
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword() {
     // For this portfolio, we treat 'admin' as the primary user
     const user = await this.usersRepository.findOne({ where: { username: 'admin' } });
     if (!user) throw new Error('User not found');
@@ -48,9 +48,14 @@ export class AuthService {
     user.resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour
 
     await this.usersRepository.save(user);
-    await this.mailService.sendPasswordResetEmail(email, token);
+    
+    // Automatically send to the admin's email stored in EMAIL_USER
+    const adminEmail = process.env.EMAIL_USER;
+    if (!adminEmail) throw new Error('Admin email not configured');
+    
+    await this.mailService.sendPasswordResetEmail(adminEmail, token);
 
-    return { message: 'Reset email sent' };
+    return { message: 'Reset email sent to admin' };
   }
 
   async resetPassword(token: string, newPass: string) {

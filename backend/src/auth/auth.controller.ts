@@ -35,16 +35,13 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('change-password')
-  async changePassword(@Request() req, @Body() body: any) {
-    return this.authService.changePassword(req.user.userId, body.currentPassword, body.newPassword);
-  }
-
-  @Get('force-reset')
-  async forceReset(@Query('secret') secret: string) {
-    if (secret !== 'temp-reset-123') {
-      return { message: 'Unauthorized backdoor' };
-    }
-    return this.authService.forceResetPassword();
+  @Post('update-credentials')
+  async updateCredentials(@Request() req, @Body() body: any) {
+    return this.authService.updateCredentials(
+      req.user.userId,
+      body.currentPassword,
+      body.newUsername,
+      body.newPassword,
+    );
   }
 }

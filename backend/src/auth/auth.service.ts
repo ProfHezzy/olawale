@@ -40,7 +40,7 @@ export class AuthService {
 
   async forgotPassword() {
     // For this portfolio, we treat 'admin' as the primary user
-    const user = await this.usersRepository.findOne({ where: { username: 'admin' } });
+    const user = await this.usersRepository.findOne({ where: { role: 'admin' } });
     if (!user) throw new Error('User not found');
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -75,7 +75,7 @@ export class AuthService {
     return { message: 'Password updated successfully' };
   }
 
-  async changePassword(userId: string, currentPass: string, newPass: string) {
+  async updateCredentials(userId: string, currentPass: string, newUsername?: string, newPass?: string) {
     const user = await this.usersRepository.findOne({ where: { id: userId as any } });
     if (!user) throw new Error('User not found');
 
@@ -83,20 +83,16 @@ export class AuthService {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
-    user.password_hash = await bcrypt.hash(newPass, 10);
-    await this.usersRepository.save(user);
+    if (newPass) {
+      user.password_hash = await bcrypt.hash(newPass, 10);
+    }
     
-    return { message: 'Password changed successfully' };
-  }
+    if (newUsername) {
+      user.username = newUsername;
+    }
 
-  async forceResetPassword() {
-    const user = await this.usersRepository.findOne({ where: { username: 'admin' } });
-    if (!user) throw new Error('User not found');
-    
-    // Hash new password "Admin@123"
-    user.password_hash = await bcrypt.hash('Admin@123', 10);
     await this.usersRepository.save(user);
     
-    return { message: 'Password successfully reset to: Admin@123' };
+    return { message: 'Credentials updated successfully' };
   }
 }

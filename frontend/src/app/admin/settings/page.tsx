@@ -276,24 +276,35 @@ function ChangePasswordForm() {
   const { register, handleSubmit, formState: { isSubmitting }, reset } = useForm();
 
   const onSubmit = async (data: any) => {
-    if (data.newPassword !== data.confirmPassword) {
-      toast.error('New passwords do not match');
+    if (!data.newUsername && !data.newPassword) {
+      toast.error('Please enter a new username or a new password to update.');
       return;
     }
-    if (data.newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters');
-      return;
+
+    if (data.newPassword) {
+      if (data.newPassword !== data.confirmPassword) {
+        toast.error('New passwords do not match');
+        return;
+      }
+      if (data.newPassword.length < 6) {
+        toast.error('New password must be at least 6 characters');
+        return;
+      }
     }
     
     try {
-      await api.post('/auth/change-password', {
+      await api.post('/auth/update-credentials', {
         currentPassword: data.currentPassword,
-        newPassword: data.newPassword
+        newUsername: data.newUsername || undefined,
+        newPassword: data.newPassword || undefined
       });
-      toast.success('Password changed successfully!');
-      reset();
+      toast.success('Credentials updated successfully! Logging out...');
+      setTimeout(() => {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/admin/login';
+      }, 1500);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to change password');
+      toast.error(err.response?.data?.message || 'Failed to update credentials');
     }
   };
 
@@ -304,22 +315,26 @@ function ChangePasswordForm() {
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
-          Security & Password
+          Security & Credentials
         </h3>
-        <p className="text-sm text-slate-500">Change your administrator password.</p>
+        <p className="text-sm text-slate-500">Update your administrator username and/or password. Current password is required to verify changes.</p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Current Password</label>
-            <input type="password" {...register('currentPassword', { required: true })} className="admin-input" />
+            <input type="password" {...register('currentPassword', { required: true })} className="admin-input" placeholder="Required to confirm changes" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">New Password</label>
-            <input type="password" {...register('newPassword', { required: true })} className="admin-input" />
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">New Username (Optional)</label>
+            <input type="text" {...register('newUsername')} className="admin-input" placeholder="Leave blank to keep current" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">New Password (Optional)</label>
+            <input type="password" {...register('newPassword')} className="admin-input" placeholder="Leave blank to keep current" />
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Confirm New Password</label>
-            <input type="password" {...register('confirmPassword', { required: true })} className="admin-input" />
+            <input type="password" {...register('confirmPassword')} className="admin-input" placeholder="Required if changing password" />
           </div>
         </div>
       </div>
@@ -331,7 +346,7 @@ function ChangePasswordForm() {
           className="flex items-center gap-2 px-8 py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-colors shadow-lg"
         >
           {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : null}
-          Change Password
+          Update Credentials
         </button>
       </div>
     </form>

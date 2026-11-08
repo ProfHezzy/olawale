@@ -5,20 +5,26 @@ import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ExternalLink, ArrowRight, Loader2, Filter } from 'lucide-react';
+import { ExternalLink, ArrowRight, Loader2, Filter, GitBranch } from 'lucide-react';
 import { useState } from 'react';
 
-const GithubIcon = ({ size = 20 }: { size?: number }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-    <path d="M9 18c-4.51 2-5-2-7-2" />
-  </svg>
-);
+interface Project {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  tech_stack: string[] | string;
+  featured?: boolean;
+  github_url?: string;
+  live_url?: string;
+  image?: string;
+}
 
 export default function ProjectsPage() {
   const [activeCategory, setActiveCategory] = useState('All');
 
-  const { data: projects, isLoading } = useQuery({
+  const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ['projects'],
     queryFn: async () => {
       const res = await api.get('/projects');
@@ -26,44 +32,63 @@ export default function ProjectsPage() {
     },
   });
 
-  const categories = ['All', ...Array.from(new Set(projects?.map((p: any) => p.category) || []))];
-  const filtered = activeCategory === 'All' 
-    ? projects 
-    : projects?.filter((p: any) => p.category === activeCategory);
+  const categories = ['All', ...Array.from(new Set(projects?.map((p) => p.category) || []))];
+  const filtered = activeCategory === 'All'
+    ? projects
+    : projects?.filter((p) => p.category === activeCategory);
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-surface-canvas dark:bg-brand-primary-950">
       <Navbar />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 bg-slate-900 text-white relative overflow-hidden">
+      <section className="pt-32 pb-16 bg-brand-primary-950 text-brand-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/20 rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-brand-highlight/10 rounded-full blur-[150px]" />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <span className="text-secondary font-bold text-sm tracking-widest uppercase mb-4 block">My Work</span>
-            <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tighter mb-6">
-              All Projects
-            </h1>
-            <p className="text-xl text-slate-400 max-w-2xl">
-              A curated collection of products, tools, and experiments I've built across web development, AI, and software engineering.
-            </p>
-          </motion.div>
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div className="flex-1">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <span className="text-brand-primary font-bold text-sm tracking-widest uppercase mb-4 block animate-in">My Work</span>
+                <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tighter mb-6 animate-in animate-in-delay-1">
+                  All Projects
+                </h1>
+                <p className="text-xl text-brand-primary-foreground/70 max-w-2xl animate-in animate-in-delay-2">
+                  A curated collection of products, tools, and experiments I have built across web development, AI, and software engineering.
+                </p>
+              </motion.div>
+            </div>
+            <div className="flex-1 hidden lg:block">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 1, 0.5, 1] }}
+                className="relative w-full max-w-[500px] mx-auto"
+              >
+                <img
+                  src="/illustrations/projects-illustration.svg"
+                  alt="Project portfolio showcase - web development, AI, and software engineering projects"
+                  className="w-full h-auto object-contain animate-float-slow"
+                />
+              </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Filter Bar */}
-      <section className="sticky top-16 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+      <section className="sticky top-16 z-30 bg-surface-canvas/80 dark:bg-brand-primary-950/80 backdrop-blur-xl border-b border-border-muted dark:border-brand-primary-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3 overflow-x-auto scrollbar-hide">
-          <Filter size={16} className="text-slate-400 shrink-0" />
-          {categories.map((cat: any) => (
+          <Filter size={16} className="text-text-muted shrink-0" />
+          {categories.map((cat: string) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${
                 activeCategory === cat
-                  ? 'bg-primary text-white shadow-md shadow-blue-500/30'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-brand-primary text-brand-primary-foreground shadow-md shadow-brand-primary/30'
+                  : 'bg-surface-subtle dark:bg-brand-primary-900 text-text-secondary hover:bg-surface-interactive dark:hover:bg-brand-primary-800 hover:text-text-primary'
               }`}
             >
               {cat}
@@ -77,40 +102,40 @@ export default function ProjectsPage() {
         <div className="max-w-7xl mx-auto px-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="animate-spin text-primary" size={40} />
+              <Loader2 className="animate-spin text-brand-primary" size={40} />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filtered?.map((project: any, idx: number) => (
+              {filtered?.map((project: Project, idx: number) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="group bg-white border border-slate-100 rounded-[28px] overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-300"
+                  transition={{ delay: idx * 0.05, duration: 0.5 }}
+                  className="group card card-brand overflow-hidden hover:shadow-xl hover:shadow-brand-primary/10 dark:hover:shadow-brand-primary/20 hover:-translate-y-2 transition-all duration-300"
                 >
                   {/* Image */}
-                  <div className="aspect-[16/10] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+                  <div className="aspect-[16/10] bg-gradient-to-br from-surface-subtle to-surface-interactive relative overflow-hidden">
                     {project.image ? (
                       <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-6xl font-black text-slate-200">{project.title?.[0]}</span>
+                        <span className="text-6xl font-black text-border-muted dark:text-brand-primary-800">{project.title?.[0]}</span>
                       </div>
                     )}
                     {project.featured && (
-                      <div className="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                      <div className="absolute top-4 left-4 px-3 py-1 bg-brand-primary text-brand-primary-foreground text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
                         Featured
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 gap-3">
                       {project.github_url && (
                         <a href={project.github_url} target="_blank" rel="noreferrer" className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors">
-                          <GithubIcon size={18} />
+                          <GitBranch size={18} />
                         </a>
                       )}
                       {project.live_url && (
-                        <a href={project.live_url} target="_blank" rel="noreferrer" className="p-2 bg-secondary rounded-full text-white hover:scale-110 transition-transform">
+                        <a href={project.live_url} target="_blank" rel="noreferrer" className="p-2 bg-brand-accent rounded-full text-brand-accent-foreground hover:scale-110 transition-transform">
                           <ExternalLink size={18} />
                         </a>
                       )}
@@ -120,16 +145,16 @@ export default function ProjectsPage() {
                   {/* Content */}
                   <div className="p-6">
                     <div className="flex items-start justify-between gap-2 mb-3">
-                      <h3 className="font-bold text-xl text-slate-900 group-hover:text-primary transition-colors leading-tight">{project.title}</h3>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary bg-blue-50 px-2 py-1 rounded-full whitespace-nowrap">{project.category}</span>
+                      <h3 className="font-extrabold text-xl text-text-primary group-hover:text-brand-primary transition-colors duration-300 leading-tight">{project.title}</h3>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary bg-brand-primary/10 dark:bg-brand-primary-900/30 px-2 py-1 rounded-full whitespace-nowrap">{project.category}</span>
                     </div>
-                    <p className="text-sm text-slate-500 leading-relaxed mb-4 line-clamp-2">{project.description}</p>
+                    <p className="text-sm text-text-secondary leading-relaxed mb-4 line-clamp-2">{project.description}</p>
                     <div className="flex flex-wrap gap-2 mb-5">
                       {(Array.isArray(project.tech_stack) ? project.tech_stack : (project.tech_stack?.split(',') || [])).slice(0, 4).map((tech: string) => (
-                        <span key={tech} className="text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-md uppercase tracking-wider">{tech.trim()}</span>
+                        <span key={tech} className="text-[10px] font-bold px-2 py-1 bg-surface-subtle dark:bg-brand-primary-900/50 text-text-secondary dark:text-text-inverse rounded-md uppercase tracking-wider border border-border-muted dark:border-brand-primary-800">{tech.trim()}</span>
                       ))}
                     </div>
-                    <Link href={`/projects/${project.slug}`} className="flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all">
+                    <Link href={`/projects/${project.slug}`} className="flex items-center gap-2 text-sm font-bold text-brand-primary hover:gap-3 transition-all">
                       View Details <ArrowRight size={16} />
                     </Link>
                   </div>
@@ -140,7 +165,7 @@ export default function ProjectsPage() {
 
           {!isLoading && filtered?.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-slate-400 text-lg">No projects in this category yet.</p>
+              <p className="text-text-muted text-lg">No projects in this category yet.</p>
             </div>
           )}
         </div>

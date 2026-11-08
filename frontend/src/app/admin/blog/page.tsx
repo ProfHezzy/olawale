@@ -183,11 +183,23 @@ function PostModal({ post, onClose }: { post?: BlogPost | null; onClose: () => v
     },
   });
 
-  const onSubmit = async (data: any) => {
+  type BlogFormData = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  read_time: string;
+  published: boolean;
+  tags: string;
+  cover_image: string;
+};
+
+  const onSubmit = async (data: BlogFormData) => {
     try {
       const payload = {
         ...data,
-        published: data.published === 'true' || data.published === true,
+        published: data.published,
         slug: data.slug || data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       };
       if (isEdit) {
@@ -199,8 +211,9 @@ function PostModal({ post, onClose }: { post?: BlogPost | null; onClose: () => v
       }
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
       onClose();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Something went wrong');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Something went wrong');
     }
   };
 

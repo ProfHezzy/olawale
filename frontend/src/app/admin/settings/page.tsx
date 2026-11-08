@@ -7,6 +7,39 @@ import { User, Save, Loader2, Link as LinkIcon, Image as ImageIcon, Briefcase, F
 import toast from 'react-hot-toast';
 import { useEffect, useRef, useState } from 'react';
 
+interface ProfileFormValues {
+  full_name: string;
+  bio: string;
+  about_me: string;
+  avatar_url: string;
+  about_image_url: string;
+  email: string;
+  location: string;
+  phone: string;
+  github_url: string;
+  linkedin_url: string;
+  twitter_url: string;
+  resume_url: string;
+  years_experience: number;
+  projects_completed: number;
+  students_taught: number;
+}
+
+interface PasswordFormValues {
+  currentPassword: string;
+  newUsername?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+}
+
+interface UploadErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 export default function AdminSettingsPage() {
   const queryClient = useQueryClient();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -19,7 +52,7 @@ export default function AdminSettingsPage() {
     queryFn: () => api.get('/profile').then((r) => r.data),
   });
 
-  const { register, handleSubmit, formState: { isSubmitting }, reset, setValue, watch } = useForm();
+  const { register, handleSubmit, formState: { isSubmitting }, reset, setValue, watch } = useForm<ProfileFormValues>();
   
   const currentAvatarUrl = watch('avatar_url');
   const currentAboutImageUrl = watch('about_image_url');
@@ -47,7 +80,7 @@ export default function AdminSettingsPage() {
   }, [profile, reset]);
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => api.patch('/profile', data),
+    mutationFn: (data: ProfileFormValues) => api.patch('/profile', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-profile'] });
       toast.success('Profile updated successfully!');
@@ -89,7 +122,7 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: ProfileFormValues) => {
     updateMutation.mutate(data);
   };
 
@@ -273,9 +306,9 @@ export default function AdminSettingsPage() {
 }
 
 function ChangePasswordForm() {
-  const { register, handleSubmit, formState: { isSubmitting }, reset } = useForm();
+  const { register, handleSubmit, formState: { isSubmitting }, reset } = useForm<PasswordFormValues>();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: PasswordFormValues) => {
     if (!data.newUsername && !data.newPassword) {
       toast.error('Please enter a new username or a new password to update.');
       return;
@@ -291,7 +324,7 @@ function ChangePasswordForm() {
         return;
       }
     }
-    
+
     try {
       await api.post('/auth/update-credentials', {
         currentPassword: data.currentPassword,
@@ -303,8 +336,9 @@ function ChangePasswordForm() {
         localStorage.removeItem('auth_token');
         window.location.href = '/admin/login';
       }, 1500);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update credentials');
+    } catch (err: unknown) {
+      const error = err as UploadErrorResponse;
+      toast.error(error.response?.data?.message || 'Failed to update credentials');
     }
   };
 

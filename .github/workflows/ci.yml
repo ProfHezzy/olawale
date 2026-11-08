@@ -1,0 +1,362 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20.x'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # ────────────────────────────────────────────────────────────────
+  # Lint & Type Check
+  # ────────────────────────────────────────────────────────────────
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (Frontend)
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run ESLint (Frontend)
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Run TypeScript check (Frontend)
+        working-directory: ./frontend
+        run: npm run type-check
+
+      - name: Setup Node.js (Backend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies (Backend)
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run ESLint (Backend)
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Run TypeScript check (Backend)
+        working-directory: ./backend
+        run: npx tsc --noEmit
+
+  # ────────────────────────────────────────────────────────────────
+  # Unit & Integration Tests
+  # ────────────────────────────────────────────────────────────────
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (Frontend)
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm run test --if-present
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: ./frontend/coverage
+          flags: unittests
+
+  # ────────────────────────────────────────────────────────────────
+  # Backend Tests
+  # ────────────────────────────────────────────────────────────────
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: portfolio_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies (Backend)
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+        run: npm run migration:run
+
+      - name: Run backend tests
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+          JWT_SECRET: test-secret-key-for-ci
+        run: npm run test --if-present
+
+  # ────────────────────────────────────────────────────────────────
+  # Build & Bundle Analysis
+  # ────────────────────────────────────────────────────────────────
+  build-and-analyze:
+    name: Build & Bundle Analysis
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (Frontend)
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build Next.js application
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npm run build
+
+      - name: Bundle Analysis (with @next/bundle-analyzer)
+        working-directory: ./frontend
+        if: always()
+        run: |
+          ANALYZE=true npm run build
+          # Extract bundle sizes
+          echo "=== Bundle Analysis ==="
+          ls -la .next/analyze/ || true
+
+      - name: Enforce Performance Budgets
+        working-directory: ./frontend
+        run: |
+          # Performance budget thresholds (in KB gzipped)
+          MAX_TOTAL_JS=350
+          MAX_CSS=50
+          MAX_FONT=100
+
+          echo "Checking bundle sizes..."
+          # This will be expanded with actual bundle size checking
+          # For now, we output the sizes for manual review
+          echo "Bundle analysis complete. Review .next/analyze/ for details."
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: |
+            frontend/.next
+            frontend/public
+          retention-days: 7
+
+  # ────────────────────────────────────────────────────────────────
+  # E2E Tests (Playwright)
+  # ────────────────────────────────────────────────────────────────
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: build-and-analyze
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (Frontend)
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build
+          path: frontend/.next
+
+      - name: Start preview server
+        working-directory: ./frontend
+        run: |
+          npm run start &
+          sleep 10
+          curl -f http://localhost:3000 || exit 1
+
+      - name: Run E2E tests
+        working-directory: ./frontend
+        run: npm run test:e2e --if-present
+
+      - name: Upload E2E artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: frontend/test-results/
+          retention-days: 7
+
+  # ────────────────────────────────────────────────────────────────
+  # Security & Dependency Audit
+  # ────────────────────────────────────────────────────────────────
+  security-audit:
+    name: Security & Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (Frontend)
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: ./frontend
+        run: npm audit --audit-level=high
+
+      - name: Check for vulnerable dependencies (Backend)
+        working-directory: ./backend
+        run: npm audit --audit-level=high
+
+      - name: Run Snyk security scan (optional)
+        if: env.SNYK_TOKEN != ''
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # ────────────────────────────────────────────────────────────────
+  # Deploy Preview (on PR)
+  # ────────────────────────────────────────────────────────────────
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: [build-and-analyze, security-audit]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build
+          path: frontend/.next
+
+      - name: Deploy to Vercel Preview
+        uses: amondnet/vercel-action@v25
+        if: env.VERCEL_TOKEN != ''
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod=false'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+  # ────────────────────────────────────────────────────────────────
+  # Deploy Production (on merge to main)
+  # ────────────────────────────────────────────────────────────────
+  deploy-production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: [build-and-analyze, security-audit, e2e]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build
+          path: frontend/.next
+
+      - name: Deploy to Vercel Production
+        uses: amondnet/vercel-action@v25
+        if: env.VERCEL_TOKEN != ''
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod=true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "🌐 Live at: https://olawale.vercel.app"

@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import api from '@/lib/api';
-import { 
-  Eye, Users, Radio, Globe, Laptop, Compass, Calendar, ChevronRight, BarChart2, AlertCircle, RefreshCw
-} from 'lucide-react';
+import { Eye, Users, ChevronRight, BarChart2, AlertCircle, RefreshCw, Radio, Globe, Compass, Laptop } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface OverviewStats {
@@ -63,6 +61,7 @@ export default function AnalyticsDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [timeScope, setTimeScope] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const isFirstMount = useRef(true);
 
   const fetchStats = async (showToast = false) => {
     try {
@@ -70,7 +69,7 @@ export default function AnalyticsDashboard() {
       const res = await api.get('/analytics/dashboard');
       setStats(res.data);
       if (showToast) toast.success('Analytics stats updated in real-time');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching analytics:', err);
       toast.error('Failed to load real-time analytics data');
     } finally {
@@ -80,7 +79,12 @@ export default function AnalyticsDashboard() {
   };
 
   useEffect(() => {
-    fetchStats();
+    const isMounted = !isFirstMount.current;
+    isFirstMount.current = false;
+
+    if (isMounted) {
+      fetchStats();
+    }
 
     // Auto-refresh stats every 30 seconds for live active tracking
     const interval = setInterval(() => {

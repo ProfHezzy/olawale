@@ -1,11 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { MessageSquare, Send, User, Clock, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+
+interface Comment {
+  id: string;
+  author_name: string;
+  content: string;
+  created_at: string;
+}
 
 interface CommentSectionProps {
   targetType: 'blog' | 'project';
@@ -13,12 +20,11 @@ interface CommentSectionProps {
 }
 
 export default function CommentSection({ targetType, targetId }: CommentSectionProps) {
-  const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const { data: comments, isLoading } = useQuery({
+  const { data: comments, isLoading } = useQuery<Comment[]>({
     queryKey: ['comments', targetType, targetId],
     queryFn: async () => {
       const res = await api.get(`/comments/${targetType}/${targetId}`);
@@ -26,8 +32,10 @@ export default function CommentSection({ targetType, targetId }: CommentSectionP
     },
   });
 
+  const safeComments = comments ?? [];
+
   const mutation = useMutation({
-    mutationFn: async (newComment: any) => {
+    mutationFn: async (newComment: { author_name: string; content: string; target_type: string; target_id: string }) => {
       return api.post('/comments', newComment);
     },
     onSuccess: () => {
@@ -138,9 +146,9 @@ export default function CommentSection({ targetType, targetId }: CommentSectionP
         <div className="lg:col-span-2">
           {isLoading ? (
             <div className="flex justify-center py-12"><Loader2 className="animate-spin text-slate-200" size={32} /></div>
-          ) : comments?.length > 0 ? (
+          ) : safeComments.length > 0 ? (
             <div className="space-y-8">
-              {comments.map((comment: any) => (
+              {safeComments.map((comment: Comment) => (
                 <div key={comment.id} className="flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
                     <User size={20} />

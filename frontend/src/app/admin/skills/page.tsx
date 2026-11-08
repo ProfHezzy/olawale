@@ -24,7 +24,14 @@ function SkillModal({ skill, onClose }: { skill?: Skill | null; onClose: () => v
     },
   });
 
-  const onSubmit = async (data: any) => {
+  type SkillFormData = {
+  name: string;
+  category: string;
+  level: string;
+  order: number;
+};
+
+  const onSubmit = async (data: SkillFormData) => {
     try {
       const payload = { ...data, order: Number(data.order) };
       if (isEdit) {
@@ -36,8 +43,9 @@ function SkillModal({ skill, onClose }: { skill?: Skill | null; onClose: () => v
       }
       queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
       onClose();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Something went wrong');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Something went wrong');
     }
   };
 

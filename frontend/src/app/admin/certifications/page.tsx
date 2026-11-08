@@ -30,7 +30,9 @@ function CertificationModal({ certification, onClose }: { certification?: Certif
     },
   });
 
-  const onSubmit = async (data: any) => {
+  type CertificationFormData = Omit<Certification, 'id'> & { id?: string };
+
+  const onSubmit = async (data: CertificationFormData) => {
     try {
       if (isEdit) {
         await api.patch(`/certifications/${certification.id}`, data);
@@ -41,8 +43,9 @@ function CertificationModal({ certification, onClose }: { certification?: Certif
       }
       queryClient.invalidateQueries({ queryKey: ['admin-certifications'] });
       onClose();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Something went wrong');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Something went wrong');
     }
   };
 

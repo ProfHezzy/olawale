@@ -9,9 +9,30 @@ import AcademicsSection from "@/components/AcademicsSection";
 import CertificationsSection from "@/components/CertificationsSection";
 import ExperienceSection from "@/components/ExperienceSection";
 import Footer from "@/components/Footer";
-import { ArrowRight, ExternalLink, Loader2, Clock, BookOpen } from "lucide-react";
+import { ArrowRight, ExternalLink, Loader2, Clock } from "lucide-react";
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+
+type Project = {
+  id: string;
+  title: string;
+  description: string;
+  slug: string;
+  category: string;
+  image?: string;
+  github_url?: string;
+  live_url?: string;
+  tech_stack: string[];
+};
+
+type BlogPost = {
+  id: string;
+  title: string;
+  excerpt: string;
+  slug: string;
+  cover_image?: string;
+  created_at: string;
+};
 
 const GithubIcon = ({ size = 20 }: { size?: number }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,7 +42,7 @@ const GithubIcon = ({ size = 20 }: { size?: number }) => (
 );
 
 export default function Home() {
-  const { data: featuredProjects, isLoading: loadingProjects } = useQuery({
+  const { data: featuredProjects, isLoading: loadingProjects } = useQuery<Project[]>({
     queryKey: ['projects', 'featured'],
     queryFn: async () => {
       const res = await api.get('/projects/featured');
@@ -29,7 +50,7 @@ export default function Home() {
     },
   });
 
-  const { data: latestPosts, isLoading: loadingPosts } = useQuery({
+  const { data: latestPosts, isLoading: loadingPosts } = useQuery<BlogPost[]>({
     queryKey: ['blog', 'latest'],
     queryFn: async () => {
       const res = await api.get('/blog');
@@ -37,7 +58,17 @@ export default function Home() {
     },
   });
 
-  const { data: profile } = useQuery({
+  const { data: profile } = useQuery<{
+    full_name: string;
+    bio: string;
+    years_experience: number;
+    projects_completed: number;
+    students_taught?: number;
+    about_image_url?: string;
+    github_url?: string;
+    email?: string;
+    about_me?: string;
+  }>({
     queryKey: ['profile'],
     queryFn: async () => {
       const res = await api.get('/profile');
@@ -160,7 +191,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredProjects?.map((project: any, idx: number) => (
+              {featuredProjects?.map((project, idx) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -202,8 +233,8 @@ export default function Home() {
                     </div>
                     <p className="text-slate-400 text-sm leading-relaxed mb-4 line-clamp-2">{project.description}</p>
                     <div className="flex flex-wrap gap-2 mb-5">
-                      {(Array.isArray(project.tech_stack) ? project.tech_stack : (project.tech_stack?.split(',') || [])).slice(0, 3).map((tech: string) => (
-                        <span key={tech} className="text-[10px] font-bold px-2 py-1 bg-white/10 rounded-md uppercase tracking-wider text-slate-300">{tech.trim()}</span>
+                      {(project.tech_stack?.length ? project.tech_stack : []).slice(0, 3).map((tech) => (
+                        <span key={tech} className="text-[10px] font-bold px-2 py-1 bg-white/10 rounded-md uppercase tracking-wider text-slate-300">{tech}</span>
                       ))}
                     </div>
                     <Link
@@ -252,7 +283,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {latestPosts.map((post: any, idx: number) => (
+                {latestPosts?.map((post, idx) => (
                   <motion.article
                     key={post.id}
                     initial={{ opacity: 0, y: 30 }}

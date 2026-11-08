@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0" />
+    </radialGradient>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="iconGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background atmosphere -->
+  <rect width="500" height="500" fill="url(#brandGradient)" opacity="0.02"/>
+
+  <!-- Central glow -->
+  <circle cx="250" cy="250" r="200" fill="url(#centerGlow)" filter="url(#softGlow)"/>
+
+  <!-- Central message/chat bubble -->
+  <g transform="translate(250, 250)" filter="url(#iconGlow)">
+    <!-- Main bubble -->
+    <path d="M 0 -80
+           Q 70 -80 70 -10
+           Q 70 50 10 80
+           L 0 100
+           L -10 80
+           Q -70 50 -70 -10
+           Q -70 -80 0 -80 Z"
+      fill="url(#brandGradient)" opacity="0.15" stroke="url(#brandGradient)" stroke-width="2"/>
+
+    <!-- Inner content lines -->
+    <g stroke="url(#brandGradient)" stroke-width="2" stroke-linecap="round" opacity="0.8">
+      <line x1="-35" y1="-40" x2="35" y2="-40">
+        <animate attributeName="stroke-dasharray" values="0,70;70,0" dur="2s" repeatCount="indefinite"/>
+      </line>
+      <line x1="-35" y1="-10" x2="20" y2="-10">
+        <animate attributeName="stroke-dasharray" values="0,55;55,0" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+      </line>
+      <line x1="-35" y1="20" x2="30" y2="20">
+        <animate attributeName="stroke-dasharray" values="0,65;65,0" dur="2s" repeatCount="indefinite" begin="0.6s"/>
+      </line>
+    </g>
+
+    <!-- Sparkles around bubble -->
+    <g fill="#F59E0B" opacity="0.8">
+      <circle cx="-85" cy="-70" r="3">
+        <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="85" cy="-70" r="2.5">
+        <animate attributeName="r" values="2.5;4;2.5" dur="1.8s" repeatCount="indefinite" begin="0.5s"/>
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite" begin="0.5s"/>
+      </circle>
+      <circle cx="-85" cy="50" r="2">
+        <animate attributeName="r" values="2;3.5;2" dur="2s" repeatCount="indefinite" begin="1s"/>
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" begin="1s"/>
+      </circle>
+      <circle cx="85" cy="50" r="3">
+        <animate attributeName="r" values="3;5;3" dur="1.7s" repeatCount="indefinite" begin="1.5s"/>
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite" begin="1.5s"/>
+      </circle>
+    </g>
+  </g>
+
+  <!-- Floating contact icons -->
+  <g font-family="system-ui" font-weight="bold" filter="url(#iconGlow)">
+    <!-- Email icon -->
+    <g transform="translate(80, 120)" opacity="0.6">
+      <rect x="-18" y="-12" width="36" height="24" rx="4" fill="none" stroke="url(#brandGradient)" stroke-width="2"/>
+      <path d="M -18 -12 L 0 6 L 18 -12" fill="none" stroke="url(#brandGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-8;0,0" dur="3s" repeatCount="indefinite" additive="sum"/>
+    </g>
+
+    <!-- Location pin -->
+    <g transform="translate(420, 130)" opacity="0.6">
+      <circle cx="0" cy="0" r="16" fill="url(#brandGradient)" opacity="0.2"/>
+      <path d="M 0 -8 Q 0 -16 -6 -16 Q -12 -16 -12 -8 Q -12 0 0 18 Q 12 0 12 -8 Q 12 -16 6 -16 Q 0 -16 0 -8" fill="url(#brandGradient)"/>
+      <circle cx="0" cy="-6" r="4" fill="#FFFFFF"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-6;0,0" dur="3.5s" repeatCount="indefinite" additive="sum"/>
+    </g>
+
+    <!-- GitHub/Code icon -->
+    <g transform="translate(60, 400)" opacity="0.6">
+      <path d="M -16 0 Q -20 -10 -16 -20 Q -12 -20 -8 -10 Q -12 0 -8 10 Q -12 20 -16 20 Q -20 10 -16 0" fill="url(#brandGradient)" opacity="0.3"/>
+      <path d="M 16 0 Q 20 -10 16 -20 Q 12 -20 8 -10 Q 12 0 8 10 Q 12 20 16 20 Q 20 10 16 0" fill="url(#brandGradient)" opacity="0.3"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,6;0,0" dur="4s" repeatCount="indefinite" additive="sum"/>
+    </g>
+
+    <!-- LinkedIn/In icon -->
+    <g transform="translate(440, 390)" opacity="0.6">
+      <rect x="-14" y="-14" width="28" height="28" rx="6" fill="url(#brandGradient)" opacity="0.3"/>
+      <text x="0" y="4" text-anchor="middle" font-size="14" font-weight="bold" fill="url(#brandGradient)">in</text>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-5;0,0" dur="3.2s" repeatCount="indefinite" additive="sum"/>
+    </g>
+
+    <!-- Twitter/X icon -->
+    <g transform="translate(100, 300)" opacity="0.6">
+      <path d="M -12 -10 Q 0 -18 12 -10 Q 16 -4 12 6 Q 8 10 0 4 Q -8 10 -12 6 Q -16 -4 -12 -10" fill="url(#brandGradient)" opacity="0.3"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,4;0,0" dur="2.8s" repeatCount="indefinite" additive="sum"/>
+    </g>
+
+    <!-- Calendar/Schedule icon -->
+    <g transform="translate(380, 60)" opacity="0.6">
+      <rect x="-16" y="-10" width="32" height="28" rx="4" fill="none" stroke="url(#brandGradient)" stroke-width="2"/>
+      <rect x="-16" y="-10" width="32" height="10" rx="4" fill="url(#brandGradient)" opacity="0.3"/>
+      <line x1="0" y1="-2" x2="0" y2="10" stroke="url(#brandGradient)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="-8" y1="6" x2="8" y2="6" stroke="url(#brandGradient)" stroke-width="1.5" stroke-linecap="round"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-7;0,0" dur="4.2s" repeatCount="indefinite" additive="sum"/>
+    </g>
+  </g>
+
+  <!-- Orbiting particles -->
+  <g fill="url(#brandGradient)" filter="url(#softGlow)">
+    <circle cx="150" cy="100" r="2.5" opacity="0.4">
+      <animateMotion path="M 0 0 Q 30 -20 60 0 Q 30 20 0 0" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="350" cy="120" r="2" opacity="0.3">
+      <animateMotion path="M 0 0 Q -25 -15 -50 0 Q -25 15 0 0" dur="7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="380" r="3" opacity="0.5">
+      <animateMotion path="M 0 0 Q 20 -15 40 0 Q 20 15 0 0" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="400" cy="380" r="2.5" opacity="0.4">
+      <animateMotion path="M 0 0 Q -20 -10 -40 0 Q -20 10 0 0" dur="7.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="7.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Connection arcs -->
+  <g stroke="url(#brandGradient)" stroke-width="1.5" stroke-dasharray="8,12" fill="none" opacity="0.1" filter="url(#softGlow)">
+    <path d="M 80 120 Q 165 185 250 250"/>
+    <path d="M 420 130 Q 335 185 250 250"/>
+    <path d="M 60 400 Q 155 325 250 250"/>
+    <path d="M 440 390 Q 345 325 250 250"/>
+    <path d="M 100 300 Q 175 275 250 250"/>
+    <path d="M 380 60 Q 315 155 250 250"/>
+  </g>
+
+  <!-- Nigerian flag subtle corners -->
+  <g opacity="0.08">
+    <rect x="12" y="12" width="10" height="10" fill="#008751" rx="2"/>
+    <rect x="478" y="478" width="10" height="10" fill="#FFFFFF" rx="2" stroke="#008751" stroke-width="1"/>
+  </g>
+
+  <!-- Decorative code brackets -->
+  <g font-family="monospace" font-size="32" font-weight="bold" fill="url(#brandGradient)" opacity="0.08" filter="url(#softGlow)">
+    <text x="30" y="80" text-anchor="middle">{</text>
+    <text x="470" y="80" text-anchor="middle">}</text>
+    <text x="30" y="440" text-anchor="middle">[</text>
+    <text x="470" y="440" text-anchor="middle">]</text>
+  </g>
+</svg>

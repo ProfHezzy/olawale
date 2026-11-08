@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { Lock, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 function ResetPasswordForm() {

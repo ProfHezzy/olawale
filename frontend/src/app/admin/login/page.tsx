@@ -22,14 +22,15 @@ export default function AdminLoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
       const res = await api.post('/auth/login', data);
       localStorage.setItem('auth_token', res.data.access_token);
       toast.success('Welcome back, Admin!');
       router.push('/admin');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Invalid credentials');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Invalid credentials');
     }
   };
 

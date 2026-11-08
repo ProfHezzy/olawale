@@ -8,7 +8,6 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -28,7 +27,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full bg-white rounded-[32px] shadow-xl shadow-slate-200/50 p-8 md:p-10 border border-slate-100"
@@ -40,8 +39,8 @@ export default function ForgotPasswordPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Forgot Password?</h1>
           <p className="text-slate-500 font-medium leading-relaxed">
-            {sent 
-              ? "We've sent a recovery link to your email address." 
+            {sent
+              ? "We've sent a recovery link to your email address."
               : "Enter your email and we'll send you a link to reset your password."}
           </p>
         </div>

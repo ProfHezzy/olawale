@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { Briefcase, BookOpen, Award, MessageSquare, TrendingUp, ArrowRight, Plus, Loader2, CheckCircle, Clock, Bot, Sparkles, Zap } from 'lucide-react';
@@ -8,46 +8,68 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  slug: string;
+  category: string;
+  tech_stack: string[];
+  featured: boolean;
+  github_url?: string;
+  live_url?: string;
+  image?: string;
+}
+
+interface Message {
+  id: string;
+  name: string;
+  subject: string;
+  read: boolean;
+  created_at: string;
+}
+
 export default function AdminDashboard() {
-  const { data: statsData } = useQuery({ 
-    queryKey: ['admin-stats'], 
+  const { data: statsData } = useQuery({
+    queryKey: ['admin-stats'],
     queryFn: () => api.get('/admin/stats').then(r => r.data),
-    refetchInterval: 5000 
+    refetchInterval: 5000
   });
-  const { data: projects } = useQuery({ 
-    queryKey: ['admin-projects'], 
+  const { data: projects } = useQuery({
+    queryKey: ['admin-projects'],
     queryFn: () => api.get('/projects').then(r => r.data),
-    refetchInterval: 10000 
+    refetchInterval: 10000
   });
-  const { data: messages } = useQuery({ 
-    queryKey: ['admin-messages'], 
+  const { data: messages } = useQuery({
+    queryKey: ['admin-messages'],
     queryFn: () => api.get('/messages').then(r => r.data),
-    refetchInterval: 5000 
+    refetchInterval: 5000
   });
 
   const stats = [
-    { name: 'Total Projects', value: statsData?.projects?.total ?? '—', icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50', href: '/admin/projects', trend: `${statsData?.projects?.likes || 0} likes` },
-    { name: 'Blog Engagement', value: statsData?.blogs?.total ?? '—', icon: BookOpen, color: 'text-purple-600', bg: 'bg-purple-50', href: '/admin/blog', trend: `${statsData?.blogs?.likes || 0} total likes` },
-    { name: 'Total Comments', value: statsData?.engagement?.totalComments ?? '—', icon: MessageSquare, color: 'text-emerald-600', bg: 'bg-emerald-50', href: '/admin/blog', trend: `${statsData?.engagement?.pendingComments || 0} pending` },
-    { name: 'Total Shares', value: statsData?.engagement?.totalShares ?? '—', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50', href: '/admin/projects', trend: 'Across all platforms' },
+    { name: 'Total Projects', value: statsData?.projects?.total ?? '—', icon: Briefcase, color: 'text-brand-primary', bg: 'bg-brand-primary/10', href: '/admin/projects', trend: `${statsData?.projects?.likes || 0} likes` },
+    { name: 'Blog Engagement', value: statsData?.blogs?.total ?? '—', icon: BookOpen, color: 'text-brand-highlight', bg: 'bg-brand-highlight/10', href: '/admin/blog', trend: `${statsData?.blogs?.likes || 0} total likes` },
+    { name: 'Total Comments', value: statsData?.engagement?.totalComments ?? '—', icon: MessageSquare, color: 'text-brand-accent', bg: 'bg-brand-accent/10', href: '/admin/blog', trend: `${statsData?.engagement?.pendingComments || 0} pending` },
+    { name: 'Total Shares', value: statsData?.engagement?.totalShares ?? '—', icon: TrendingUp, color: 'text-brand-accent', bg: 'bg-brand-accent/10', href: '/admin/projects', trend: 'Across all platforms' },
   ];
 
   const quickActions = [
-    { label: 'New Project', href: '/admin/projects', icon: Briefcase, color: 'bg-blue-500 hover:bg-blue-600' },
-    { label: 'Write Post', href: '/admin/blog', icon: BookOpen, color: 'bg-purple-500 hover:bg-purple-600' },
-    { label: 'Add Skill', href: '/admin/skills', icon: Award, color: 'bg-emerald-500 hover:bg-emerald-600' },
-    { label: 'Messages', href: '/admin/messages', icon: MessageSquare, color: 'bg-orange-500 hover:bg-orange-600' },
+    { label: 'New Project', href: '/admin/projects', icon: Briefcase, color: 'bg-brand-primary hover:bg-brand-primary/90' },
+    { label: 'Write Post', href: '/admin/blog', icon: BookOpen, color: 'bg-brand-highlight hover:bg-brand-highlight/90' },
+    { label: 'Add Skill', href: '/admin/skills', icon: Award, color: 'bg-brand-accent hover:bg-brand-accent/90' },
+    { label: 'Messages', href: '/admin/messages', icon: MessageSquare, color: 'bg-brand-primary/80 hover:bg-brand-primary' },
   ];
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-3xl" />
+      <div className="bg-gradient-to-r from-brand-primary-950 to-brand-primary-900 rounded-2xl p-8 text-brand-primary-foreground relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-brand-primary/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-0 w-48 h-48 bg-brand-highlight/10 rounded-full blur-3xl" />
         <div className="relative z-10">
-          <p className="text-slate-400 text-sm font-medium mb-1">Good day,</p>
+          <p className="text-brand-primary-foreground/60 text-sm font-medium mb-1">Good day,</p>
           <h2 className="text-3xl font-extrabold tracking-tight mb-2">Hezekiah 👋</h2>
-          <p className="text-slate-400">Here&apos;s what&apos;s happening with your portfolio today.</p>
+          <p className="text-brand-primary-foreground/60">Here&apos;s what&apos;s happening with your portfolio today.</p>
         </div>
       </div>
 
@@ -62,16 +84,16 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.07 }}
             >
-              <Link href={stat.href} className="block bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:shadow-slate-200/60 hover:-translate-y-0.5 transition-all group">
+              <Link href={stat.href} className="block card card-brand p-6 hover:shadow-xl hover:shadow-brand-primary/10 dark:hover:shadow-brand-primary/20 hover:-translate-y-0.5 transition-all group">
                 <div className="flex items-center justify-between mb-5">
                   <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
                     <Icon size={22} />
                   </div>
-                  <ArrowRight size={16} className="text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                  <ArrowRight size={16} className="text-text-muted group-hover:text-brand-primary group-hover:translate-x-1 transition-all" />
                 </div>
-                <h3 className="text-3xl font-extrabold text-slate-900 mb-1">{stat.value}</h3>
-                <p className="text-sm text-slate-500 font-medium">{stat.name}</p>
-                <p className="text-xs text-slate-400 mt-1">{stat.trend}</p>
+                <h3 className="text-3xl font-extrabold text-text-primary mb-1">{stat.value}</h3>
+                <p className="text-sm text-text-secondary font-medium">{stat.name}</p>
+                <p className="text-xs text-text-muted mt-1">{stat.trend}</p>
               </Link>
             </motion.div>
           );
@@ -80,32 +102,32 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Projects */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-bold text-slate-900">Recent Projects</h3>
-            <Link href="/admin/projects" className="text-sm font-bold text-primary hover:text-blue-700 flex items-center gap-1">
+        <div className="lg:col-span-2 card card-brand overflow-hidden">
+          <div className="p-6 border-b border-border-default dark:border-brand-primary-800 flex items-center justify-between">
+            <h3 className="font-extrabold text-text-primary">Recent Projects</h3>
+            <Link href="/admin/projects" className="text-sm font-bold text-brand-primary hover:text-brand-primary/80 flex items-center gap-1">
               Manage <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="divide-y divide-slate-50">
+          <div className="divide-y divide-border-muted dark:divide-brand-primary-800/50">
             {!projects ? (
-              <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-300" /></div>
-            ) : projects.slice(0, 5).map((project: any) => (
-              <div key={project.id} className="px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
+              <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-text-muted" /></div>
+            ) : projects.slice(0, 5).map((project: Project) => (
+              <div key={project.id} className="p-4 flex items-center gap-4 hover:bg-surface-subtle dark:hover:bg-brand-primary-800/50 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-highlight flex items-center justify-center text-white font-bold text-sm shrink-0">
                   {project.title[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 text-sm truncate">{project.title}</p>
-                  <p className="text-xs text-slate-400">{project.category}</p>
+                  <p className="font-semibold text-text-primary text-sm truncate">{project.title}</p>
+                  <p className="text-xs text-text-muted">{project.category}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {project.featured && (
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-yellow-50 text-yellow-600 rounded-full border border-yellow-100">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-brand-accent/10 dark:bg-brand-accent/20 text-brand-accent rounded-full border border-brand-accent/20">
                       Featured
                     </span>
                   )}
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">{project.category}</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 bg-brand-primary/10 dark:bg-brand-primary-900/30 text-brand-primary rounded-full border border-brand-primary/20">{project.category}</span>
                 </div>
               </div>
             ))}
@@ -118,16 +140,16 @@ export default function AdminDashboard() {
           <AiBlogPanel />
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900">Quick Actions</h3>
+          <div className="card card-brand overflow-hidden">
+            <div className="p-6 border-b border-border-default dark:border-brand-primary-800">
+              <h3 className="font-extrabold text-text-primary">Quick Actions</h3>
             </div>
             <div className="p-4 grid grid-cols-2 gap-3">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
                   <Link key={action.label} href={action.href}
-                    className={`flex flex-col items-center justify-center p-4 rounded-xl text-white font-bold text-xs text-center gap-2 transition-all hover:scale-105 ${action.color}`}
+                    className={`flex flex-col items-center justify-center p-4 rounded-xl text-brand-primary-foreground font-bold text-xs text-center gap-2 transition-all hover:scale-105 ${action.color}`}
                   >
                     <Plus size={16} />
                     <Icon size={18} />
@@ -139,28 +161,28 @@ export default function AdminDashboard() {
           </div>
 
           {/* Recent Messages Preview */}
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-900">Messages</h3>
-              <Link href="/admin/messages" className="text-sm font-bold text-primary hover:text-blue-700 flex items-center gap-1">
+          <div className="card card-brand overflow-hidden">
+            <div className="p-6 border-b border-border-default dark:border-brand-primary-800 flex items-center justify-between">
+              <h3 className="font-extrabold text-text-primary">Messages</h3>
+              <Link href="/admin/messages" className="text-sm font-bold text-brand-primary hover:text-brand-primary/80 flex items-center gap-1">
                 View All <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="divide-y divide-slate-50">
+            <div className="divide-y divide-border-muted dark:divide-brand-primary-800/50">
               {!messages ? (
-                <div className="p-6 flex justify-center"><Loader2 className="animate-spin text-slate-300" size={20} /></div>
+                <div className="p-6 flex justify-center"><Loader2 className="animate-spin text-text-muted" size={20} /></div>
               ) : messages.length === 0 ? (
                 <div className="p-6 text-center">
-                  <CheckCircle size={28} className="text-emerald-300 mx-auto mb-2" />
-                  <p className="text-sm text-slate-400 font-medium">No messages yet</p>
+                  <CheckCircle size={28} className="text-status-success-icon mx-auto mb-2" />
+                  <p className="text-sm text-text-muted font-medium">No messages yet</p>
                 </div>
-              ) : messages.slice(0, 3).map((msg: any) => (
-                <div key={msg.id} className="px-6 py-3 flex items-start gap-3">
-                  <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${msg.read ? 'bg-slate-200' : 'bg-primary'}`} />
+              ) : messages.slice(0, 3).map((msg: Message) => (
+                <div key={msg.id} className="p-3 flex items-start gap-3">
+                  <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${msg.read ? 'bg-text-muted' : 'bg-brand-primary'}`} />
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 truncate">{msg.name}</p>
-                    <p className="text-xs text-slate-400 truncate">{msg.subject}</p>
-                    <p className="text-xs text-slate-300 flex items-center gap-1 mt-0.5">
+                    <p className="text-sm font-bold text-text-primary truncate">{msg.name}</p>
+                    <p className="text-xs text-text-muted truncate">{msg.subject}</p>
+                    <p className="text-xs text-text-muted/70 flex items-center gap-1 mt-0.5">
                       <Clock size={10} /> {new Date(msg.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -199,29 +221,29 @@ function AiBlogPanel() {
   };
 
   const buttons = [
-    { type: 'expertise', label: '📝 Article', color: 'bg-white/20 hover:bg-white/30' },
-    { type: 'news', label: '📰 Tech News', color: 'bg-white/20 hover:bg-white/30' },
-    { type: 'jobs', label: '💼 Job Board', color: 'bg-white/20 hover:bg-white/30' },
+    { type: 'expertise', label: '📝 Article', color: 'bg-brand-primary/20 hover:bg-brand-primary/30' },
+    { type: 'news', label: '📰 Tech News', color: 'bg-brand-highlight/20 hover:bg-brand-highlight/30' },
+    { type: 'jobs', label: '💼 Job Board', color: 'bg-brand-accent/20 hover:bg-brand-accent/30' },
   ];
 
   return (
-    <div className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl overflow-hidden text-white">
+    <div className="bg-gradient-to-br from-brand-primary to-brand-highlight rounded-2xl overflow-hidden text-brand-primary-foreground">
       <div className="p-5">
         <div className="flex items-center gap-2 mb-2">
-          <Bot size={18} className="text-violet-200" />
+          <Bot size={18} className="text-brand-primary-foreground/70" />
           <h3 className="font-bold text-sm">AI Blog Autopilot</h3>
         </div>
         <div className="flex items-center gap-2 mb-3">
-          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-brand-primary-foreground/20 px-2 py-0.5 rounded-full">
             <Zap size={9} /> 8AM
           </span>
-          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-brand-primary-foreground/20 px-2 py-0.5 rounded-full">
             <Zap size={9} /> 2PM
           </span>
-          <span className="text-[10px] text-violet-300">Daily WAT</span>
+          <span className="text-[10px] text-brand-primary-foreground/70">Daily WAT</span>
         </div>
-        <p className="text-violet-200 text-xs leading-relaxed mb-4">
-          Gemini AI auto-posts articles, tech news &amp; job listings. Click below to publish one now.
+        <p className="text-brand-primary-foreground/70 text-xs leading-relaxed mb-4">
+          Gemini AI auto-posts articles, tech news & job listings. Click below to publish one now.
         </p>
         <div className="grid grid-cols-3 gap-2 mb-2">
           {buttons.map((btn) => (
@@ -242,7 +264,7 @@ function AiBlogPanel() {
         <button
           onClick={() => handleGenerate('expertise')}
           disabled={generating !== null}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-white text-purple-700 font-black text-sm rounded-xl hover:bg-violet-50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-primary-foreground text-brand-primary font-black text-sm rounded-xl hover:bg-brand-primary-foreground/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {generating ? (
             <><Loader2 size={15} className="animate-spin" /> Generating...</>
@@ -251,7 +273,7 @@ function AiBlogPanel() {
           )}
         </button>
         {lastResult && (
-          <p className="text-[10px] text-violet-200 mt-2 text-center">{lastResult}</p>
+          <p className="text-[10px] text-brand-primary-foreground/70 mt-2 text-center">{lastResult}</p>
         )}
       </div>
     </div>

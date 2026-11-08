@@ -17,11 +17,20 @@ type Experience = {
   order: number;
 };
 
+interface ExperienceFormValues {
+  company: string;
+  position: string;
+  location: string;
+  period: string;
+  description: string;
+  order: number;
+}
+
 function ExperienceModal({ experience, onClose }: { experience?: Experience | null; onClose: () => void }) {
   const queryClient = useQueryClient();
   const isEdit = !!experience;
-  
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm({
+
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm<ExperienceFormValues>({
     defaultValues: {
       company: experience?.company || '',
       position: experience?.position || '',
@@ -32,7 +41,7 @@ function ExperienceModal({ experience, onClose }: { experience?: Experience | nu
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ExperienceFormValues) => {
     try {
       if (isEdit) {
         await api.patch(`/experience/${experience.id}`, data);
@@ -43,8 +52,9 @@ function ExperienceModal({ experience, onClose }: { experience?: Experience | nu
       }
       queryClient.invalidateQueries({ queryKey: ['admin-experience'] });
       onClose();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Something went wrong');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Something went wrong');
     }
   };
 

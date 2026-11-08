@@ -1,24 +1,33 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { MessageSquare, Check, Trash2, Loader2, ExternalLink, Clock, Tag } from 'lucide-react';
+import { MessageSquare, Check, Trash2, Loader2, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-export default function AdminCommentsPage() {
-  const queryClient = useQueryClient();
+interface Comment {
+  id: string;
+  author_name: string;
+  content: string;
+  target_type: 'blog' | 'project';
+  created_at: string;
+  approved: boolean;
+}
 
-  const { data: comments, isLoading } = useQuery({
+export default function AdminCommentsPage() {
+
+  const { data: comments, isLoading } = useQuery<Comment[]>({
     queryKey: ['admin-comments'],
     queryFn: () => api.get('/comments').then(r => r.data),
-    refetchInterval: 5000, // Real-time polling
+    refetchInterval: 5000,
   });
+
+  const safeComments = comments ?? [];
 
   const approveMutation = useMutation({
     mutationFn: (id: string) => api.patch(`/comments/${id}/approve`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-comments'] });
       toast.success('Comment approved!');
     }
   });
@@ -26,7 +35,6 @@ export default function AdminCommentsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/comments/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-comments'] });
       toast.success('Comment deleted');
     }
   });
@@ -48,9 +56,9 @@ export default function AdminCommentsPage() {
 
       <div className="grid grid-cols-1 gap-4">
         <AnimatePresence mode="popLayout">
-          {comments?.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0 }} 
+          {safeComments.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="bg-white p-12 rounded-[32px] border border-slate-100 text-center"
             >
@@ -58,7 +66,7 @@ export default function AdminCommentsPage() {
               <p className="text-slate-500 font-bold">No comments yet</p>
             </motion.div>
           ) : (
-            comments.map((comment: any) => (
+            safeComments.map((comment: Comment) => (
               <motion.div
                 key={comment.id}
                 layout

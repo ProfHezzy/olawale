@@ -18,6 +18,16 @@ type Academic = {
   order: number;
 };
 
+type AcademicFormValues = {
+  institution: string;
+  degree: string;
+  location: string;
+  period: string;
+  grade: string;
+  description: string;
+  order: number;
+};
+
 function AcademicModal({ academic, onClose }: { academic?: Academic | null; onClose: () => void }) {
   const queryClient = useQueryClient();
   const isEdit = !!academic;
@@ -34,7 +44,7 @@ function AcademicModal({ academic, onClose }: { academic?: Academic | null; onCl
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: AcademicFormValues) => {
     try {
       if (isEdit) {
         await api.patch(`/academics/${academic.id}`, data);
@@ -45,8 +55,9 @@ function AcademicModal({ academic, onClose }: { academic?: Academic | null; onCl
       }
       queryClient.invalidateQueries({ queryKey: ['admin-academics'] });
       onClose();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Something went wrong');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Something went wrong');
     }
   };
 

@@ -26,13 +26,13 @@ export class ProfileService {
 
   async updateProfile(updateData: Partial<Profile>): Promise<Profile> {
     let profile = await this.profileRepository.findOne({ where: { id: 1 } });
-    
+
     if (!profile) {
       profile = this.profileRepository.create({ id: 1, ...updateData });
     } else {
       this.profileRepository.merge(profile, updateData);
     }
-    
+
     return this.profileRepository.save(profile);
   }
 }

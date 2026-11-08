@@ -21,7 +21,10 @@ export class CommentsController {
   }
 
   @Get(':type/:id')
-  findByTarget(@Param('type') type: any, @Param('id') id: string) {
+  findByTarget(
+    @Param('type') type: 'blog' | 'project',
+    @Param('id') id: string,
+  ) {
     return this.commentsService.findByTarget(type, id);
   }
 

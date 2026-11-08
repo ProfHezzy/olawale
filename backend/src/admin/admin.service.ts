@@ -30,7 +30,7 @@ export class AdminService {
       projectLikes,
       projectShares,
       totalComments,
-      pendingComments
+      pendingComments,
     ] = await Promise.all([
       this.blogRepository.count(),
       this.projectRepository.count(),
@@ -64,7 +64,7 @@ export class AdminService {
         totalShares: (blogShares || 0) + (projectShares || 0),
         totalComments,
         pendingComments,
-      }
+      },
     };
   }
 }

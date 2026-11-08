@@ -29,7 +29,9 @@ export class AiBlogScheduler {
   // ──────────────────────────────────────
   @Cron('0 13 * * *', { timeZone: 'UTC' })
   async handleAfternoonPost() {
-    this.logger.log('🌤️  [2PM WAT] Afternoon AI Blog: Starting job listings...');
+    this.logger.log(
+      '🌤️  [2PM WAT] Afternoon AI Blog: Starting job listings...',
+    );
     const result = await this.aiBlogService.generateAfternoonPost();
     if (result.success) {
       this.logger.log(`🎉 Afternoon Post: "${result.title}"`);

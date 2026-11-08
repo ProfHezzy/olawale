@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: ReturnType<typeof nodemailer.createTransport>;
 
   constructor(private configService: ConfigService) {
     const user = this.configService.get<string>('EMAIL_USER');
@@ -21,7 +22,12 @@ export class MailService {
     });
   }
 
-  async sendContactEmails(data: { name: string; email: string; subject: string; message: string }) {
+  async sendContactEmails(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) {
     const adminEmail = this.configService.get<string>('EMAIL_USER');
 
     // 1. Alert to Admin

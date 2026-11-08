@@ -8,9 +8,7 @@ import { Comment } from '../comments/entities/comment.entity';
 import { Message } from '../messages/entities/message.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([BlogPost, Project, Comment, Message]),
-  ],
+  imports: [TypeOrmModule.forFeature([BlogPost, Project, Comment, Message])],
   controllers: [AdminController],
   providers: [AdminService],
 })

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThan } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { Visit } from './entities/visit.entity';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
@@ -15,7 +15,8 @@ export class AnalyticsService {
     private readonly visitRepository: Repository<Visit>,
     private readonly configService: ConfigService,
   ) {
-    this.salt = this.configService.get<string>('JWT_SECRET') || 'fallback-salt-key-123';
+    this.salt =
+      this.configService.get<string>('JWT_SECRET') || 'fallback-salt-key-123';
   }
 
   /**
@@ -34,7 +35,11 @@ export class AnalyticsService {
   /**
    * Parse user agent string into browser, OS, and device type.
    */
-  private parseUserAgent(uaString: string): { browser: string; os: string; device: string } {
+  private parseUserAgent(uaString: string): {
+    browser: string;
+    os: string;
+    device: string;
+  } {
     if (!uaString) {
       return { browser: 'Unknown', os: 'Unknown', device: 'Desktop' };
     }
@@ -47,7 +52,9 @@ export class AnalyticsService {
     // 1. Device Type
     if (/ipad|tablet|(android(?!.*mobile))/i.test(ua)) {
       device = 'Tablet';
-    } else if (/mobile|iphone|ipod|android|blackberry|opera mini|iemobile/i.test(ua)) {
+    } else if (
+      /mobile|iphone|ipod|android|blackberry|opera mini|iemobile/i.test(ua)
+    ) {
       device = 'Mobile';
     }
 
@@ -56,7 +63,11 @@ export class AnalyticsService {
       os = 'Windows';
     } else if (ua.includes('macintosh') || ua.includes('mac os')) {
       os = 'MacOS';
-    } else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
+    } else if (
+      ua.includes('iphone') ||
+      ua.includes('ipad') ||
+      ua.includes('ipod')
+    ) {
       os = 'iOS';
     } else if (ua.includes('android')) {
       os = 'Android';
@@ -71,7 +82,11 @@ export class AnalyticsService {
       browser = 'Chrome';
     } else if (ua.includes('firefox') || ua.includes('fxios')) {
       browser = 'Firefox';
-    } else if (ua.includes('safari') && !ua.includes('chrome') && !ua.includes('android')) {
+    } else if (
+      ua.includes('safari') &&
+      !ua.includes('chrome') &&
+      !ua.includes('android')
+    ) {
       browser = 'Safari';
     } else if (ua.includes('opr/') || ua.includes('opera')) {
       browser = 'Opera';
@@ -84,14 +99,19 @@ export class AnalyticsService {
    * Parse referrer URL to get clean domain name.
    */
   private parseReferrer(refUrl?: string): string {
-    if (!refUrl || refUrl === '' || refUrl === 'null' || refUrl === 'undefined') {
+    if (
+      !refUrl ||
+      refUrl === '' ||
+      refUrl === 'null' ||
+      refUrl === 'undefined'
+    ) {
       return 'Direct';
     }
 
     try {
       const url = new URL(refUrl);
-      let hostname = url.hostname.replace('www.', '');
-      
+      const hostname = url.hostname.replace('www.', '');
+
       // Clean up common referrers
       if (hostname.includes('t.co') || hostname.includes('twitter.com')) {
         return 'Twitter/X';
@@ -105,14 +125,18 @@ export class AnalyticsService {
       if (hostname.includes('google.')) {
         return 'Google';
       }
-      
+
       return hostname;
     } catch {
       // Fallback if document.referrer is a raw string
       if (refUrl.toLowerCase().includes('linkedin')) return 'LinkedIn';
       if (refUrl.toLowerCase().includes('github')) return 'GitHub';
       if (refUrl.toLowerCase().includes('google')) return 'Google';
-      if (refUrl.toLowerCase().includes('twitter') || refUrl.toLowerCase().includes('t.co')) return 'Twitter/X';
+      if (
+        refUrl.toLowerCase().includes('twitter') ||
+        refUrl.toLowerCase().includes('t.co')
+      )
+        return 'Twitter/X';
       return refUrl;
     }
   }
@@ -132,9 +156,10 @@ export class AnalyticsService {
       const ipHash = this.hashIp(payload.ip || '127.0.0.1');
       const { browser, os, device } = this.parseUserAgent(payload.userAgent);
       const referrer = this.parseReferrer(payload.referrer);
-      
+
       // Prioritize Render/Cloudflare headers, then client-side timezone-based country, then default
-      const country = payload.countryHeader || payload.clientCountry || 'Unknown';
+      const country =
+        payload.countryHeader || payload.clientCountry || 'Unknown';
 
       const visit = new Visit();
       visit.ipHash = ipHash;
@@ -147,8 +172,9 @@ export class AnalyticsService {
 
       await this.visitRepository.save(visit);
       return true;
-    } catch (error: any) {
-      this.logger.error(`Error recording visit: ${error.message}`);
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error recording visit: ${errMsg}`);
       return false;
     }
   }
@@ -158,32 +184,29 @@ export class AnalyticsService {
    */
   async getDashboardStats() {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
 
-    const [
-      totalPageViews,
-      allUniqueVisitors,
-      liveVisitors,
-      visitsPastYear
-    ] = await Promise.all([
-      this.visitRepository.count(),
-      this.visitRepository
-        .createQueryBuilder('visit')
-        .select('COUNT(DISTINCT visit.ipHash)', 'count')
-        .getRawOne()
-        .then((res) => parseInt(res.count || '0', 10)),
-      this.visitRepository
-        .createQueryBuilder('visit')
-        .select('COUNT(DISTINCT visit.ipHash)', 'count')
-        .where('visit.timestamp >= :time', { time: fiveMinutesAgo })
-        .getRawOne()
-        .then((res) => parseInt(res.count || '0', 10)),
-      this.visitRepository.find({
-        where: { timestamp: MoreThan(oneYearAgo) },
-        order: { timestamp: 'ASC' },
-      })
-    ]);
+    type RawCountResult = { count: string };
+
+    const [totalPageViews, allUniqueVisitors, liveVisitors, visitsPastYear] =
+      await Promise.all([
+        this.visitRepository.count(),
+        this.visitRepository
+          .createQueryBuilder('visit')
+          .select('COUNT(DISTINCT visit.ipHash)', 'count')
+          .getRawOne()
+          .then((res: RawCountResult) => parseInt(res.count || '0', 10)),
+        this.visitRepository
+          .createQueryBuilder('visit')
+          .select('COUNT(DISTINCT visit.ipHash)', 'count')
+          .where('visit.timestamp >= :time', { time: fiveMinutesAgo })
+          .getRawOne()
+          .then((res: RawCountResult) => parseInt(res.count || '0', 10)),
+        this.visitRepository.find({
+          where: { timestamp: MoreThan(oneYearAgo) },
+          order: { timestamp: 'ASC' },
+        }),
+      ]);
 
     // ──────────────────────────────────────
     // 1. DATA GROUPING (Referrers, Pages, Hardware, Geo)
@@ -198,7 +221,7 @@ export class AnalyticsService {
     visitsPastYear.forEach((v) => {
       // Referrers
       referrersMap[v.referrer] = (referrersMap[v.referrer] || 0) + 1;
-      
+
       // Page Views (Unique is calculated per path)
       if (!pagesMap[v.path]) {
         pagesMap[v.path] = { total: 0, unique: new Set() };
@@ -231,8 +254,14 @@ export class AnalyticsService {
       .slice(0, 10);
 
     const hardware = {
-      devices: Object.entries(devicesMap).map(([name, count]) => ({ name, count })),
-      browsers: Object.entries(browsersMap).map(([name, count]) => ({ name, count })),
+      devices: Object.entries(devicesMap).map(([name, count]) => ({
+        name,
+        count,
+      })),
+      browsers: Object.entries(browsersMap).map(([name, count]) => ({
+        name,
+        count,
+      })),
       os: Object.entries(osMap).map(([name, count]) => ({ name, count })),
     };
 
@@ -245,26 +274,38 @@ export class AnalyticsService {
     // 2. TIME SERIES AGGREGATIONS
     // ──────────────────────────────────────
     // (a) Daily Trends (Past 7 Days)
-    const dailyViews: Record<string, { views: number; uniques: Set<string> }> = {};
+    const dailyViews: Record<string, { views: number; uniques: Set<string> }> =
+      {};
     for (let i = 6; i >= 0; i--) {
       const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const label = date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
       dailyViews[label] = { views: 0, uniques: new Set() };
     }
 
     // (b) Weekly Trends (Past 4 Weeks)
-    const weeklyViews: Record<string, { views: number; uniques: Set<string> }> = {};
+    const weeklyViews: Record<string, { views: number; uniques: Set<string> }> =
+      {};
     for (let i = 3; i >= 0; i--) {
       const label = `Week -${i}`;
       weeklyViews[label] = { views: 0, uniques: new Set() };
     }
 
     // (c) Monthly Trends (Past 12 Months)
-    const monthlyViews: Record<string, { views: number; uniques: Set<string> }> = {};
+    const monthlyViews: Record<
+      string,
+      { views: number; uniques: Set<string> }
+    > = {};
     for (let i = 11; i >= 0; i--) {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
-      const label = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      const label = date.toLocaleDateString('en-US', {
+        month: 'short',
+        year: '2-digit',
+      });
       monthlyViews[label] = { views: 0, uniques: new Set() };
     }
 
@@ -277,7 +318,11 @@ export class AnalyticsService {
       // 7-day bin
       const daysAgo = Math.floor((nowTime - visitTime) / (24 * 60 * 60 * 1000));
       if (daysAgo >= 0 && daysAgo < 7) {
-        const label = visitDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        const label = visitDate.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        });
         if (dailyViews[label]) {
           dailyViews[label].views += 1;
           dailyViews[label].uniques.add(v.ipHash);
@@ -285,7 +330,9 @@ export class AnalyticsService {
       }
 
       // 4-week bin
-      const weeksAgo = Math.floor((nowTime - visitTime) / (7 * 24 * 60 * 60 * 1000));
+      const weeksAgo = Math.floor(
+        (nowTime - visitTime) / (7 * 24 * 60 * 60 * 1000),
+      );
       if (weeksAgo >= 0 && weeksAgo < 4) {
         const label = `Week -${weeksAgo}`;
         if (weeklyViews[label]) {
@@ -299,7 +346,10 @@ export class AnalyticsService {
         (new Date().getFullYear() - visitDate.getFullYear()) * 12 +
         (new Date().getMonth() - visitDate.getMonth());
       if (monthsAgo >= 0 && monthsAgo < 12) {
-        const label = visitDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        const label = visitDate.toLocaleDateString('en-US', {
+          month: 'short',
+          year: '2-digit',
+        });
         if (monthlyViews[label]) {
           monthlyViews[label].views += 1;
           monthlyViews[label].uniques.add(v.ipHash);
@@ -307,7 +357,9 @@ export class AnalyticsService {
       }
     });
 
-    const formatTrend = (trendData: Record<string, { views: number; uniques: Set<string> }>) =>
+    const formatTrend = (
+      trendData: Record<string, { views: number; uniques: Set<string> }>,
+    ) =>
       Object.entries(trendData).map(([label, d]) => ({
         label,
         views: d.views,

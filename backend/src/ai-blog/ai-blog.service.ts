@@ -1,30 +1,134 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { GenerateContentResult } from '@google/generative-ai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { BlogService } from '../blog/blog.service';
 
 // === POST TYPE 1: EXPERTISE TOPICS ===
 const EXPERTISE_TOPICS = [
-  { topic: 'The evolution of Artificial Intelligence: Neural Networks explained', category: 'AI & ML', tags: 'AI,MachineLearning,NeuralNetworks,Tech', readTime: '9' },
-  { topic: 'Hardware vs Software: The future of custom silicon chips in computing', category: 'Hardware', tags: 'Hardware,Computing,Silicon,Tech', readTime: '8' },
-  { topic: 'Cybersecurity essentials for the modern digital age', category: 'Security', tags: 'Cybersecurity,Privacy,Security,Tech', readTime: '7' },
-  { topic: 'How Cloud Computing is reshaping enterprise infrastructure', category: 'Cloud Computing', tags: 'Cloud,AWS,Azure,Infrastructure', readTime: '8' },
-  { topic: 'The rise of edge computing and IoT devices', category: 'Hardware', tags: 'IoT,EdgeComputing,Hardware,Tech', readTime: '6' },
-  { topic: 'Understanding Blockchain beyond cryptocurrencies', category: 'Web3', tags: 'Blockchain,Web3,Tech,Decentralization', readTime: '9' },
-  { topic: 'The impact of 5G and 6G technologies on global connectivity', category: 'Networking', tags: '5G,Networking,Telecom,Tech', readTime: '7' },
-  { topic: 'Building scalable APIs with modern backend architectures', category: 'Software Engineering', tags: 'API,Backend,Architecture,Tech', readTime: '10' },
-  { topic: 'A deep dive into quantum computing capabilities', category: 'Future Tech', tags: 'QuantumComputing,Future,Tech,Science', readTime: '8' },
-  { topic: 'The psychology of UI/UX design in modern applications', category: 'Design', tags: 'UI,UX,Design,Software', readTime: '6' },
-  { topic: 'Demystifying DevOps and continuous integration pipelines', category: 'DevOps', tags: 'DevOps,CI/CD,Software,Automation', readTime: '7' },
-  { topic: 'The future of augmented reality (AR) and virtual reality (VR) in tech', category: 'AR/VR', tags: 'AR,VR,Metaverse,Tech', readTime: '8' },
-  { topic: 'Big Data: How companies process petabytes of information', category: 'Data Science', tags: 'BigData,DataScience,Analytics,Tech', readTime: '9' },
-  { topic: 'Ethics in AI: Bias, transparency, and accountability', category: 'AI & ML', tags: 'AI,Ethics,MachineLearning,Tech', readTime: '7' },
-  { topic: 'Sustainable tech: Green computing and reducing electronic waste', category: 'Hardware', tags: 'Sustainability,Hardware,GreenTech,Environment', readTime: '6' },
-  { topic: 'The role of open-source software in driving tech innovation', category: 'Software Engineering', tags: 'OpenSource,Software,Innovation,Tech', readTime: '8' },
-  { topic: 'Next-generation robotics and automation in manufacturing', category: 'Robotics', tags: 'Robotics,Automation,Hardware,Tech', readTime: '7' },
-  { topic: 'The convergence of biotechnology and artificial intelligence', category: 'BioTech', tags: 'BioTech,AI,HealthTech,Science', readTime: '9' },
-  { topic: 'Mobile development trends: Native vs Cross-platform frameworks', category: 'Software Engineering', tags: 'Mobile,AppDev,Software,Tech', readTime: '6' },
-  { topic: 'How machine learning models are trained and optimized', category: 'AI & ML', tags: 'MachineLearning,AI,Data,Tech', readTime: '8' },
+  {
+    topic:
+      'The evolution of Artificial Intelligence: Neural Networks explained',
+    category: 'AI & ML',
+    tags: 'AI,MachineLearning,NeuralNetworks,Tech',
+    readTime: '9',
+  },
+  {
+    topic:
+      'Hardware vs Software: The future of custom silicon chips in computing',
+    category: 'Hardware',
+    tags: 'Hardware,Computing,Silicon,Tech',
+    readTime: '8',
+  },
+  {
+    topic: 'Cybersecurity essentials for the modern digital age',
+    category: 'Security',
+    tags: 'Cybersecurity,Privacy,Security,Tech',
+    readTime: '7',
+  },
+  {
+    topic: 'How Cloud Computing is reshaping enterprise infrastructure',
+    category: 'Cloud Computing',
+    tags: 'Cloud,AWS,Azure,Infrastructure',
+    readTime: '8',
+  },
+  {
+    topic: 'The rise of edge computing and IoT devices',
+    category: 'Hardware',
+    tags: 'IoT,EdgeComputing,Hardware,Tech',
+    readTime: '6',
+  },
+  {
+    topic: 'Understanding Blockchain beyond cryptocurrencies',
+    category: 'Web3',
+    tags: 'Blockchain,Web3,Tech,Decentralization',
+    readTime: '9',
+  },
+  {
+    topic: 'The impact of 5G and 6G technologies on global connectivity',
+    category: 'Networking',
+    tags: '5G,Networking,Telecom,Tech',
+    readTime: '7',
+  },
+  {
+    topic: 'Building scalable APIs with modern backend architectures',
+    category: 'Software Engineering',
+    tags: 'API,Backend,Architecture,Tech',
+    readTime: '10',
+  },
+  {
+    topic: 'A deep dive into quantum computing capabilities',
+    category: 'Future Tech',
+    tags: 'QuantumComputing,Future,Tech,Science',
+    readTime: '8',
+  },
+  {
+    topic: 'The psychology of UI/UX design in modern applications',
+    category: 'Design',
+    tags: 'UI,UX,Design,Software',
+    readTime: '6',
+  },
+  {
+    topic: 'Demystifying DevOps and continuous integration pipelines',
+    category: 'DevOps',
+    tags: 'DevOps,CI/CD,Software,Automation',
+    readTime: '7',
+  },
+  {
+    topic:
+      'The future of augmented reality (AR) and virtual reality (VR) in tech',
+    category: 'AR/VR',
+    tags: 'AR,VR,Metaverse,Tech',
+    readTime: '8',
+  },
+  {
+    topic: 'Big Data: How companies process petabytes of information',
+    category: 'Data Science',
+    tags: 'BigData,DataScience,Analytics,Tech',
+    readTime: '9',
+  },
+  {
+    topic: 'Ethics in AI: Bias, transparency, and accountability',
+    category: 'AI & ML',
+    tags: 'AI,Ethics,MachineLearning,Tech',
+    readTime: '7',
+  },
+  {
+    topic: 'Sustainable tech: Green computing and reducing electronic waste',
+    category: 'Hardware',
+    tags: 'Sustainability,Hardware,GreenTech,Environment',
+    readTime: '6',
+  },
+  {
+    topic: 'The role of open-source software in driving tech innovation',
+    category: 'Software Engineering',
+    tags: 'OpenSource,Software,Innovation,Tech',
+    readTime: '8',
+  },
+  {
+    topic: 'Next-generation robotics and automation in manufacturing',
+    category: 'Robotics',
+    tags: 'Robotics,Automation,Hardware,Tech',
+    readTime: '7',
+  },
+  {
+    topic: 'The convergence of biotechnology and artificial intelligence',
+    category: 'BioTech',
+    tags: 'BioTech,AI,HealthTech,Science',
+    readTime: '9',
+  },
+  {
+    topic: 'Mobile development trends: Native vs Cross-platform frameworks',
+    category: 'Software Engineering',
+    tags: 'Mobile,AppDev,Software,Tech',
+    readTime: '6',
+  },
+  {
+    topic: 'How machine learning models are trained and optimized',
+    category: 'AI & ML',
+    tags: 'MachineLearning,AI,Data,Tech',
+    readTime: '8',
+  },
 ];
 
 // === POST TYPE 2: TECH NEWS TOPICS ===
@@ -48,18 +152,66 @@ const NEWS_TOPICS = [
 
 // === POST TYPE 3: JOB LISTING SEARCH TERMS ===
 const JOB_SEARCH_TERMS = [
-  { search: 'software engineer jobs remote', focus: 'Software Engineering', tags: 'Software,Engineering,Remote,Jobs' },
-  { search: 'AI engineer machine learning jobs', focus: 'AI & Machine Learning', tags: 'AI,MachineLearning,Jobs,Tech' },
-  { search: 'hardware engineer embedded systems jobs', focus: 'Hardware Engineering', tags: 'Hardware,Embedded,Engineering,Jobs' },
-  { search: 'cloud architect DevOps jobs remote', focus: 'Cloud & DevOps', tags: 'Cloud,DevOps,Remote,Jobs' },
-  { search: 'data scientist big data jobs', focus: 'Data Science', tags: 'DataScience,BigData,Analytics,Jobs' },
-  { search: 'cybersecurity analyst security engineer jobs', focus: 'Cybersecurity', tags: 'Cybersecurity,Security,InfoSec,Jobs' },
-  { search: 'product manager UI/UX design tech jobs', focus: 'Product & Design', tags: 'Product,UI,UX,Design,Jobs' },
-  { search: 'tech jobs Africa remote hybrid', focus: 'Global Tech Roles', tags: 'Tech,Remote,Africa,Global,Jobs' },
-  { search: 'IT support network engineer jobs', focus: 'IT & Networking', tags: 'IT,Networking,Support,Jobs' },
-  { search: 'robotics automation engineer jobs', focus: 'Robotics', tags: 'Robotics,Automation,Engineering,Jobs' },
-  { search: 'blockchain Web3 developer jobs remote', focus: 'Web3 & Blockchain', tags: 'Web3,Blockchain,Remote,Jobs' },
-  { search: 'mobile app developer iOS Android jobs', focus: 'Mobile Development', tags: 'Mobile,iOS,Android,Jobs' },
+  {
+    search: 'software engineer jobs remote',
+    focus: 'Software Engineering',
+    tags: 'Software,Engineering,Remote,Jobs',
+  },
+  {
+    search: 'AI engineer machine learning jobs',
+    focus: 'AI & Machine Learning',
+    tags: 'AI,MachineLearning,Jobs,Tech',
+  },
+  {
+    search: 'hardware engineer embedded systems jobs',
+    focus: 'Hardware Engineering',
+    tags: 'Hardware,Embedded,Engineering,Jobs',
+  },
+  {
+    search: 'cloud architect DevOps jobs remote',
+    focus: 'Cloud & DevOps',
+    tags: 'Cloud,DevOps,Remote,Jobs',
+  },
+  {
+    search: 'data scientist big data jobs',
+    focus: 'Data Science',
+    tags: 'DataScience,BigData,Analytics,Jobs',
+  },
+  {
+    search: 'cybersecurity analyst security engineer jobs',
+    focus: 'Cybersecurity',
+    tags: 'Cybersecurity,Security,InfoSec,Jobs',
+  },
+  {
+    search: 'product manager UI/UX design tech jobs',
+    focus: 'Product & Design',
+    tags: 'Product,UI,UX,Design,Jobs',
+  },
+  {
+    search: 'tech jobs Africa remote hybrid',
+    focus: 'Global Tech Roles',
+    tags: 'Tech,Remote,Africa,Global,Jobs',
+  },
+  {
+    search: 'IT support network engineer jobs',
+    focus: 'IT & Networking',
+    tags: 'IT,Networking,Support,Jobs',
+  },
+  {
+    search: 'robotics automation engineer jobs',
+    focus: 'Robotics',
+    tags: 'Robotics,Automation,Engineering,Jobs',
+  },
+  {
+    search: 'blockchain Web3 developer jobs remote',
+    focus: 'Web3 & Blockchain',
+    tags: 'Web3,Blockchain,Remote,Jobs',
+  },
+  {
+    search: 'mobile app developer iOS Android jobs',
+    focus: 'Mobile Development',
+    tags: 'Mobile,iOS,Android,Jobs',
+  },
 ];
 
 type PostType = 'expertise' | 'news' | 'jobs';
@@ -81,36 +233,54 @@ export class AiBlogService {
       this.genAI = new GoogleGenerativeAI(apiKey);
       this.logger.log('✅ AI Blog Service initialized with Gemini API');
     } else {
-      this.logger.warn('⚠️  GEMINI_API_KEY not set. AI blog posting is disabled.');
+      this.logger.warn(
+        '⚠️  GEMINI_API_KEY not set. AI blog posting is disabled.',
+      );
     }
   }
 
   private generateSlug(title: string): string {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim()
-      .substring(0, 80) +
-      '-' + Date.now().toString().slice(-6);
+    return (
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+        .substring(0, 80) +
+      '-' +
+      Date.now().toString().slice(-6)
+    );
   }
 
   private getCoverImage(category: string): string {
     const coverImages: Record<string, string> = {
-      Backend: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop',
-      Frontend: 'https://images.unsplash.com/photo-1593720219276-0b1eacd0aef4?q=80&w=800&auto=format&fit=crop',
-      Database: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=800&auto=format&fit=crop',
-      'Data Analysis': 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
-      'Web Development': 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
-      DevOps: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop',
-      Security: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop',
-      Tools: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?q=80&w=800&auto=format&fit=crop',
-      Education: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop',
-      FinTech: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=800&auto=format&fit=crop',
-      Career: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
-      'Tech News': 'https://images.unsplash.com/photo-1504711434969-e33886168d6c?q=80&w=800&auto=format&fit=crop',
-      'Job Board': 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800&auto=format&fit=crop',
+      Backend:
+        'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop',
+      Frontend:
+        'https://images.unsplash.com/photo-1593720219276-0b1eacd0aef4?q=80&w=800&auto=format&fit=crop',
+      Database:
+        'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=800&auto=format&fit=crop',
+      'Data Analysis':
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
+      'Web Development':
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+      DevOps:
+        'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop',
+      Security:
+        'https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop',
+      Tools:
+        'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?q=80&w=800&auto=format&fit=crop',
+      Education:
+        'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop',
+      FinTech:
+        'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=800&auto=format&fit=crop',
+      Career:
+        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+      'Tech News':
+        'https://images.unsplash.com/photo-1504711434969-e33886168d6c?q=80&w=800&auto=format&fit=crop',
+      'Job Board':
+        'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800&auto=format&fit=crop',
     };
     return coverImages[category] || coverImages['Web Development'];
   }
@@ -118,8 +288,13 @@ export class AiBlogService {
   // ──────────────────────────────────────
   // POST TYPE 1: EXPERTISE ARTICLES
   // ──────────────────────────────────────
-  private async generateExpertisePost(): Promise<{ success: boolean; title?: string; error?: string }> {
-    const topicData = EXPERTISE_TOPICS[this.expertiseIndex % EXPERTISE_TOPICS.length];
+  private async generateExpertisePost(): Promise<{
+    success: boolean;
+    title?: string;
+    error?: string;
+  }> {
+    const topicData =
+      EXPERTISE_TOPICS[this.expertiseIndex % EXPERTISE_TOPICS.length];
     this.expertiseIndex++;
 
     this.logger.log(`🤖 [Expertise] Generating about: "${topicData.topic}"`);
@@ -145,17 +320,30 @@ Return ONLY a valid JSON object (no markdown, no backticks):
   "content": "The full HTML blog post content"
 }`;
 
-    return this.callGeminiAndPublish(prompt, topicData.category, topicData.tags, topicData.readTime);
+    return this.callGeminiAndPublish(
+      prompt,
+      topicData.category,
+      topicData.tags,
+      topicData.readTime,
+    );
   }
 
   // ──────────────────────────────────────
   // POST TYPE 2: TECH NEWS ROUNDUP
   // ──────────────────────────────────────
-  private async generateNewsPost(): Promise<{ success: boolean; title?: string; error?: string }> {
+  private async generateNewsPost(): Promise<{
+    success: boolean;
+    title?: string;
+    error?: string;
+  }> {
     const newsTopic = NEWS_TOPICS[this.newsIndex % NEWS_TOPICS.length];
     this.newsIndex++;
 
-    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const today = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
     this.logger.log(`📰 [Tech News] Generating roundup about: "${newsTopic}"`);
 
     const prompt = `You are a tech news blogger writing for a portfolio blog owned by Hezekiah Olawale Ojenike, a Technology Professional based in Nigeria.
@@ -179,18 +367,33 @@ Return ONLY a valid JSON object (no markdown, no backticks):
   "content": "The full HTML blog post content"
 }`;
 
-    return this.callGeminiAndPublish(prompt, 'Tech News', `TechNews,${newsTopic.split(' ').slice(0, 3).join(',')}`, '6');
+    return this.callGeminiAndPublish(
+      prompt,
+      'Tech News',
+      `TechNews,${newsTopic.split(' ').slice(0, 3).join(',')}`,
+      '6',
+    );
   }
 
   // ──────────────────────────────────────
   // POST TYPE 3: JOB LISTINGS
   // ──────────────────────────────────────
-  private async generateJobsPost(): Promise<{ success: boolean; title?: string; error?: string }> {
+  private async generateJobsPost(): Promise<{
+    success: boolean;
+    title?: string;
+    error?: string;
+  }> {
     const jobData = JOB_SEARCH_TERMS[this.jobsIndex % JOB_SEARCH_TERMS.length];
     this.jobsIndex++;
 
-    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    this.logger.log(`💼 [Job Board] Generating job listings for: "${jobData.focus}"`);
+    const today = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    this.logger.log(
+      `💼 [Job Board] Generating job listings for: "${jobData.focus}"`,
+    );
 
     const prompt = `You are writing a tech job listings blog post for a portfolio blog owned by Hezekiah Olawale Ojenike, a Technology Professional based in Nigeria.
 
@@ -205,7 +408,7 @@ CRITICAL REQUIREMENTS:
    - Type (Remote 🌍 / Hybrid 🏢 / Onsite 📍)
    - Key Requirements (2-3 bullet points)
    - Apply Link
-4. VERY IMPORTANT - PREVENT BROKEN LINKS: Because specific job posting URLs often expire quickly or result in 404 errors, do NOT guess or hallucinate direct job URLs (like indeed.com/viewjob?jk=123). Instead, the "Apply Link" MUST be a dynamic SEARCH URL for that specific role or company. 
+4. VERY IMPORTANT - PREVENT BROKEN LINKS: Because specific job posting URLs often expire quickly or result in 404 errors, do NOT guess or hallucinate direct job URLs (like indeed.com/viewjob?jk=123). Instead, the "Apply Link" MUST be a dynamic SEARCH URL for that specific role or company.
    For example:
    - <a href="https://www.linkedin.com/jobs/search?keywords=Company+Name+Job+Title" target="_blank">View on LinkedIn</a>
    - <a href="https://indeed.com/jobs?q=Company+Name+Job+Title" target="_blank">View on Indeed</a>
@@ -247,7 +450,8 @@ Return ONLY a valid JSON object (no markdown, no backticks):
       return { success: false, error: 'GEMINI_API_KEY not configured' };
     }
 
-    const configuredModel = this.configService.get<string>('GEMINI_MODEL') || 'gemini-3.5-flash';
+    const configuredModel =
+      this.configService.get<string>('GEMINI_MODEL') || 'gemini-3.5-flash';
     const modelsToTry = [
       configuredModel,
       'gemini-3.5-flash',
@@ -259,40 +463,45 @@ Return ONLY a valid JSON object (no markdown, no backticks):
     ];
     const uniqueModels = Array.from(new Set(modelsToTry));
 
-    let result: any = null;
-    let lastError: any = null;
+    let result: GenerateContentResult | null = null;
+    let lastError: unknown = null;
     let usedModelName = '';
 
     for (const modelName of uniqueModels) {
       try {
-        this.logger.log(`🤖 Attempting content generation with model: ${modelName}...`);
+        this.logger.log(
+          `🤖 Attempting content generation with model: ${modelName}...`,
+        );
         const model = this.genAI.getGenerativeModel({ model: modelName });
         result = await model.generateContent(prompt);
         usedModelName = modelName;
         break; // Successfully generated content
-      } catch (err: any) {
+      } catch (err: unknown) {
         lastError = err;
-        this.logger.warn(`⚠️  Model ${modelName} failed: ${err.message || err}`);
+        const errMsg = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`⚠️  Model ${modelName} failed: ${errMsg}`);
       }
     }
 
     if (!result) {
-      this.logger.error(`❌ All models failed. Last error: ${lastError?.message || lastError}`);
-      return { success: false, error: `All models failed: ${lastError?.message || lastError}` };
+      const errMsg =
+        lastError instanceof Error ? lastError.message : String(lastError);
+      this.logger.error(`❌ All models failed. Last error: ${errMsg}`);
+      return {
+        success: false,
+        error: `All models failed: ${errMsg}`,
+      };
     }
 
     try {
-      const responseText = result.response.text().trim();
+      const response = result.response;
+      if (!response || !response.text) {
+        return { success: false, error: 'Invalid Gemini response format' };
+      }
+      const responseText = response.text().trim();
 
-      let parsed: { title: string; excerpt: string; content: string };
-      try {
-        const jsonStr = responseText
-          .replace(/^```json\s*/i, '')
-          .replace(/^```\s*/i, '')
-          .replace(/```\s*$/i, '')
-          .trim();
-        parsed = JSON.parse(jsonStr);
-      } catch {
+      const parsed = this.parseJsonResponse(responseText);
+      if (!parsed) {
         this.logger.error('Failed to parse AI response as JSON');
         return { success: false, error: 'Failed to parse AI response' };
       }
@@ -315,18 +524,57 @@ Return ONLY a valid JSON object (no markdown, no backticks):
         cover_image: this.getCoverImage(category),
       });
 
-      this.logger.log(`✅ Published [${category}] using ${usedModelName}: "${parsed.title}"`);
+      this.logger.log(
+        `✅ Published [${category}] using ${usedModelName}: "${parsed.title}"`,
+      );
       return { success: true, title: parsed.title };
-    } catch (error: any) {
-      this.logger.error(`❌ Publishing failed: ${error.message}`);
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`❌ Publishing failed: ${errMsg}`);
+      return { success: false, error: errMsg };
+    }
+  }
+
+  private parseJsonResponse(text: string): {
+    title: string;
+    excerpt: string;
+    content: string;
+  } | null {
+    try {
+      const jsonStr = text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const parsed: unknown = JSON.parse(jsonStr);
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        'title' in parsed &&
+        'excerpt' in parsed &&
+        'content' in parsed &&
+        typeof (parsed as Record<string, unknown>).title === 'string' &&
+        typeof (parsed as Record<string, unknown>).excerpt === 'string' &&
+        typeof (parsed as Record<string, unknown>).content === 'string'
+      ) {
+        return {
+          title: (parsed as Record<string, unknown>).title as string,
+          excerpt: (parsed as Record<string, unknown>).excerpt as string,
+          content: (parsed as Record<string, unknown>).content as string,
+        };
+      }
+      return null;
+    } catch {
+      return null;
     }
   }
 
   // ──────────────────────────────────────
   // PUBLIC: Generate a specific type of post
   // ──────────────────────────────────────
-  async generateAndPublishPost(type?: PostType): Promise<{ success: boolean; title?: string; error?: string }> {
+  async generateAndPublishPost(
+    type?: PostType,
+  ): Promise<{ success: boolean; title?: string; error?: string }> {
     if (!this.genAI) {
       return { success: false, error: 'GEMINI_API_KEY not configured' };
     }
@@ -335,7 +583,8 @@ Return ONLY a valid JSON object (no markdown, no backticks):
     if (!type) {
       const rotation: PostType[] = ['expertise', 'news', 'jobs'];
       const dayOfYear = Math.floor(
-        (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000,
+        (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) /
+          86400000,
       );
       type = rotation[dayOfYear % rotation.length];
     }
@@ -353,9 +602,14 @@ Return ONLY a valid JSON object (no markdown, no backticks):
   }
 
   // Morning post: rotates between expertise and news
-  async generateMorningPost(): Promise<{ success: boolean; title?: string; error?: string }> {
+  async generateMorningPost(): Promise<{
+    success: boolean;
+    title?: string;
+    error?: string;
+  }> {
     const dayOfYear = Math.floor(
-      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000,
+      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) /
+        86400000,
     );
     // Alternate days: even = expertise, odd = news
     const type: PostType = dayOfYear % 2 === 0 ? 'expertise' : 'news';
@@ -364,7 +618,11 @@ Return ONLY a valid JSON object (no markdown, no backticks):
   }
 
   // Afternoon post: always job listings (most useful for readers)
-  async generateAfternoonPost(): Promise<{ success: boolean; title?: string; error?: string }> {
+  async generateAfternoonPost(): Promise<{
+    success: boolean;
+    title?: string;
+    error?: string;
+  }> {
     this.logger.log(`🌤️ Afternoon Post: Generating job listings...`);
     return this.generateAndPublishPost('jobs');
   }

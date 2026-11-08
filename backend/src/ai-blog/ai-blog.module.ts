@@ -6,10 +6,7 @@ import { AiBlogScheduler } from './ai-blog.scheduler';
 import { AiBlogController } from './ai-blog.controller';
 
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    BlogModule,
-  ],
+  imports: [ScheduleModule.forRoot(), BlogModule],
   providers: [AiBlogService, AiBlogScheduler],
   controllers: [AiBlogController],
 })

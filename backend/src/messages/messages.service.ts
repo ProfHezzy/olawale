@@ -22,7 +22,7 @@ export class MessagesService {
 
     // Fire and forget email sending
     if (data.name && data.email && data.subject && data.message) {
-      this.mailService.sendContactEmails({
+      void this.mailService.sendContactEmails({
         name: data.name,
         email: data.email,
         subject: data.subject,

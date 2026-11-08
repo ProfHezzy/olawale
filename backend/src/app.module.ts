@@ -37,7 +37,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
             url,
             autoLoadEntities: true,
             synchronize: true,
-            ssl: nodeEnv === 'production' ? { rejectUnauthorized: false } : false,
+            ssl:
+              nodeEnv === 'production' ? { rejectUnauthorized: false } : false,
           };
         }
 

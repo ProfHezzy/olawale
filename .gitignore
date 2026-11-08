@@ -6,20 +6,28 @@
 
 # Project specific
 prompt.md
-*.png
-*.jpg
-*.jpeg
 
 # Dependencies
 node_modules/
 dist/
 .next/
 build/
+coverage/
 
 # Environment
 .env
 .env.local
 .env.*.local
+.env*.local
 
 # Database
 postgres_data/
+
+# Claude / Tooling / Logs
+.claude/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel/
+

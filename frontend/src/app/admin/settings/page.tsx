@@ -83,6 +83,7 @@ export default function AdminSettingsPage() {
     mutationFn: (data: ProfileFormValues) => api.patch('/profile', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] }); // Invalidate public profile cache
       toast.success('Profile updated successfully!');
     },
     onError: () => toast.error('Failed to update profile'),
@@ -129,6 +130,7 @@ export default function AdminSettingsPage() {
       };
       await api.patch('/profile', profileData);
       queryClient.invalidateQueries({ queryKey: ['admin-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] }); // Invalidate public profile cache
       toast.success('Profile updated with new image!');
     } catch (error) {
       toast.error('Failed to upload image or save profile');

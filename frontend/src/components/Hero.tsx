@@ -57,7 +57,7 @@ export default function Hero() {
             </motion.div>
           </div>
 
-          {/* Custom Hero Illustration */}
+          {/* Hero Avatar / Illustration */}
           <motion.div
             className="flex-1 relative"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -65,13 +65,21 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 1, 0.5, 1] }}
           >
             <div className="relative w-72 h-72 md:w-[500px] md:h-[500px] mx-auto">
-              {/* Custom Illustration */}
+              {/* Profile Avatar or Custom Illustration */}
               <div className="absolute inset-0 w-full h-full">
-                <img
-                  src="/illustrations/hero-illustration.svg"
-                  alt="Hezekiah Ojenike - Full Stack Software Engineer building scalable web systems"
-                  className="w-full h-full object-contain animate-float-slow"
-                />
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.full_name || 'Profile'}
+                    className="w-full h-full object-cover rounded-[50%] animate-float-slow border-4 border-white/20 dark:border-brand-primary-900/50"
+                  />
+                ) : (
+                  <img
+                    src="/illustrations/hero-illustration.svg"
+                    alt="Hezekiah Ojenike - Full Stack Software Engineer building scalable web systems"
+                    className="w-full h-full object-contain animate-float-slow"
+                  />
+                )}
               </div>
 
               {/* Floating Elements — Brand Accent */}

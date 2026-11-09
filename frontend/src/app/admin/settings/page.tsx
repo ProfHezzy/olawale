@@ -108,8 +108,30 @@ export default function AdminSettingsPage() {
       const fullUrl = res.data.url;
       setValue(fieldName, fullUrl, { shouldDirty: true, shouldValidate: true });
       toast.success('Image uploaded!');
+
+      // Automatically save the profile with the new image URL
+      const profileData = {
+        full_name: watch('full_name'),
+        bio: watch('bio'),
+        about_me: watch('about_me'),
+        avatar_url: isAvatar ? fullUrl : watch('avatar_url'),
+        about_image_url: isAvatar ? watch('about_image_url') : fullUrl,
+        email: watch('email'),
+        location: watch('location'),
+        phone: watch('phone'),
+        github_url: watch('github_url'),
+        linkedin_url: watch('linkedin_url'),
+        twitter_url: watch('twitter_url'),
+        resume_url: watch('resume_url'),
+        years_experience: watch('years_experience'),
+        projects_completed: watch('projects_completed'),
+        students_taught: watch('students_taught'),
+      };
+      await api.patch('/profile', profileData);
+      queryClient.invalidateQueries({ queryKey: ['admin-profile'] });
+      toast.success('Profile updated with new image!');
     } catch (error) {
-      toast.error('Failed to upload image');
+      toast.error('Failed to upload image or save profile');
       console.error(error);
     } finally {
       if (isAvatar) {
